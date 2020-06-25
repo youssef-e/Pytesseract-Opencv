@@ -289,12 +289,12 @@ def first_name_extract(extracted_lines):
 def id_extract(extracted_lines):
     id_nbr="-1"
     for line in extracted_lines:
-        if ("Nationale" in line.lower() or "carte" in line.lower() or " identite" in line.lower()):
+        if ("ationale" in line.lower() or "carte" in line.lower() or " identite" in line.lower()):
             id_nbrs = line.split(" ")
             for value in id_nbrs:
                 for i in range(len(value)):
-                    if(value[i]>'0' and value[i]<'9'):
-                        id_nbr=value
+                    if(value[i]>='0' and value[i]<='9'):
+                        id_nbr=value                   
                         break
                     else:
                         break
