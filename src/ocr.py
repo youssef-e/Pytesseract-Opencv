@@ -10,19 +10,29 @@ import numpy as np
 import re
 import time
 import math
+import json
 
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
 
-
+def get_parent_dir(n=1):
+    """ returns the n-th parent dicrectory of the current
+    working directory """
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    for k in range(n):
+        current_path = os.path.dirname(current_path)
+    return current_path
 
 # Rescale the image, if needed.
 def rescaling(image, imagename):
     im_pil=img_pil = Image.fromarray(image)
     imagepaths=imagename.split("/")
     imagenames=imagepaths[len(imagepaths)-1].split(".")
-    imagename=imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]
-    for i in range(len(imagepaths)-2,1,-1):
-    	imagename=imagepaths[i]+"/"+imagename
+    path="."
+    for value in imagepaths:
+        if value == imagepaths[len(imagepaths)-1]:
+            break
+        path=path+"/"+value
+    imagename=path+"/"+imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]  
     print(imagename)
     img_pil = img_pil.save(imagename, dpi=(600, 600))
     image = cv2.imread(imagename)
@@ -225,16 +235,19 @@ def get_Strings(image):
     for mrz in mrz2s:
         print(mrz+" len: "+str(len(mrz)))
     
-    mean_word(names)
-    mean_word(fnames)
-    mean_word(id_nbrs)
-    mean_word(nationalities)
-    mean_word(genders)
-    mean_word(birthdays)
-    mean_mrz(mrz1s)
-    mean_mrz(mrz2s)
-
-    return names
+    x = {
+    "Name" : mean_word(names),
+    "First_name" : mean_word(fnames),
+    "Id_number" : mean_word(id_nbrs),
+    "Nationality" : mean_word(nationalities),
+    "Gender" : mean_word(genders),
+    "Birthday" : mean_word(birthdays),
+    "MRZ_l1" : mean_mrz(mrz1s),
+    "MRZ_l2" : mean_mrz(mrz2s)
+    }
+    y=json.dumps(x,sort_keys=True,indent=4)
+    print(y)
+    return x
 
 #look for the name in the extracted lines using key words to locate it; it returns a str
 def name_extract(extracted_lines):
@@ -249,10 +262,7 @@ def name_extract(extracted_lines):
             if("on"in line):
                 name = line.split(":")[len(line.split(":"))-1].split(" ")[len(line.split(":")[len(line.split(":"))-1].split(" "))-1]
                 break
-
-
     return name
-
 
 #look for the first name(s) in the extracted lines using key words to locate it/them; it returns a str containing the first names separated with spaces
 def first_name_extract(extracted_lines):
@@ -285,6 +295,7 @@ def first_name_extract(extracted_lines):
                 fname = "-1"
         j=j+1
     return fname
+
 #look for the id in the extracted lines using key words to locate it; it returns a str
 def id_extract(extracted_lines):
     id_nbr="-1"
@@ -352,6 +363,7 @@ def birthday_extract(extracted_lines):
             #however if the image is too small, they may not be any lines below the firstname, it then sends an error
             
     return bd
+
 #look for the gender in the extracted lines using key words to locate it; it returns a str
 def gender_extract(extracted_lines):
     gender = "-1"
@@ -442,6 +454,7 @@ def mean_word(words):
                 key = c
         final_word = final_word + key 
     print("final word : "+final_word)
+    return final_word
 
 def mean_mrz(words):
     mean_len = mean_length(words)
@@ -467,25 +480,58 @@ def mean_mrz(words):
                 key = c
         final_word = final_word + key 
     print("MRZ :\n"+final_word)
+    return final_word
 
 
 
 #~~~~~~~~~~~~~~ Main function ~~~~~~~~~~~~~~~~~#
 #variable declaration
+detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
+
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required=True,
-   help="path to input image to be OCR'd")
-args = vars(ap.parse_args())
+ap.add_argument(
+    "-i", "--image",
+    required=True,
+    help="path to input image to be OCR'd"
+)
+
+ap.add_argument(
+        "-njs", "--no_js",
+        default=False,
+        action="store_true",
+        help="save the output in a JSON file. Default is False.",
+    )
+
+ap.add_argument(
+        "-o","--output",
+        type=str,
+        default=detection_results_folder,
+        help="Output path for detection results. Default is "
+        + detection_results_folder,
+    )
+
+
+FLAGS = ap.parse_args()
+save_result= not FLAGS.no_js
+result_folder=FLAGS.output
 
 # load the example image and convert it to grayscale
-img = cv2.imread(args["image"])   
-img = rescaling(img,args["image"])
+img = cv2.imread(FLAGS.image)   
+img = rescaling(img,FLAGS.image)
 img = deskew(img) 
 img = get_grayscale(img)
 img = remove_noise(img)
-txt= get_Strings(img)
+result = get_Strings(img)
+if save_result:
+    detection_results_file = os.path.join(result_folder, "Detection_Results.json")
+    with open(detection_results_file, 'w') as f:
+        json.dump(result, f,sort_keys=True,indent=4)
+else:
+    print("no Json output")
+
+
 
 #cv2.imshow('img', img)
 cv2.waitKey(100000)
