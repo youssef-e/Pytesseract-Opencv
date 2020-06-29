@@ -176,7 +176,7 @@ def get_Strings(image):
     mrz2s=[]
     for i in range(1,10):
         thresh = apply_threshold(img,i)
-        result = unicodedata.normalize("NFKD",pytesseract.image_to_string(thresh, lang='fra')).encode('ascii', 'ignore')
+        result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
         print('#=======================================================')
         print("#=================== filter "+str(i)+" ===================")
         print('#=======================================================')
@@ -254,7 +254,7 @@ def name_extract(extracted_lines):
     name="-1"
     for i in range(len(extracted_lines)):
         line=extracted_lines[i]
-    	if ("Nom" in line or "Mom" in line or " nom:" in line or "Non" in line or "non" in line):
+        if ("Nom" in line or "Mom" in line or " nom:" in line or "Non" in line or "non" in line):
             name = line.split(":")[len(line.split(":"))-1].split(" ")[len(line.split(":")[len(line.split(":"))-1].split(" "))-1]
             break
         elif ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
@@ -420,20 +420,19 @@ def mrz2_extract(extracted_lines):
             
 
 def mean_length(words):
-	mean_lengths=[]
-	max_occur=0
-	mean_length=0
-	for word in words:
-		if word != "-1":
-			mean_lengths.append(len(word))
-	for length in mean_lengths:
-		if(max_occur<mean_lengths.count(length)):
-			max_occur=mean_lengths.count(length)
-			mean_length = length
-
-        if type(mean_length)==type(" "):
-            mean_length = 0
-	return mean_length	
+    mean_lengths=[]
+    max_occur=0
+    mean_length=0
+    for word in words:
+        if word != "-1":
+            mean_lengths.append(len(word))
+        for length in mean_lengths:
+            if(max_occur<mean_lengths.count(length)):
+                max_occur=mean_lengths.count(length)
+                mean_length = length
+            if(type(mean_length)==type(" ")):
+                mean_length = 0
+    return mean_length	
 
 def mean_word(words):
     mean_len = mean_length(words)
