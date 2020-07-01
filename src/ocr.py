@@ -1,8 +1,7 @@
 # import the necessary packages
 import unicodedata
-from PIL import Image
+from PIL import Image, ImageChops
 import pytesseract
-from pytesseract import Output
 import argparse
 from cv2 import *
 import os
@@ -11,8 +10,19 @@ import re
 import time
 import math
 import json
-
+import fitz
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
+
+
+
+
+def trim(im):
+    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    if bbox:
+        return im.crop(bbox)
 
 def get_parent_dir(n=1):
     """ returns the n-th parent dicrectory of the current
@@ -27,19 +37,20 @@ def rescaling(image, imagename):
     im_pil=img_pil = Image.fromarray(image)
     imagepaths=imagename.split("/")
     imagenames=imagepaths[len(imagepaths)-1].split(".")
-    path="."
-    for value in imagepaths:
-        if value == imagepaths[len(imagepaths)-1]:
-            break
-        path=path+"/"+value
-    imagename=path+"/"+imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]  
+
+    imagename=detection_results_folder+"/"+imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]  
     print(imagename)
     img_pil = img_pil.save(imagename, dpi=(600, 600))
     image = cv2.imread(imagename)
     print(image.shape)
     d=(1024,768)
-    print(image.size)
+    if image.shape[0] == image.shape[1]:
+        scale_percent = int(900 * 100 /image.shape[0]) # percent of original size
+        width = int(image.shape[1] * scale_percent / 100)
+        height = int(image.shape[0] * scale_percent / 100)
+        d = (width, height)
     img = cv2.resize(image, d, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    print(img.shape)
     os.remove(imagename)
     return img
 
@@ -59,10 +70,11 @@ def remove_noise(image):
  
 #thresholding with different filters
 def apply_threshold(img,gray, argument):
+    kernel = np.ones((1,1), np.uint8)
     switcher = {
-        1: cv2.threshold(cv2.GaussianBlur(img, (9, 9), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        2: cv2.threshold(cv2.GaussianBlur(img, (7, 7), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        3: cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        1: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        2: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        3: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
         4: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         5: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         6: cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
@@ -74,7 +86,13 @@ def apply_threshold(img,gray, argument):
         12: img,
         13: gray,
         14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 2),
-        15: cv2.threshold(cv2.medianBlur(gray, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+        15: cv2.threshold(cv2.medianBlur(gray, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        16: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
+        17: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
+        18: cv2.adaptiveThreshold(cv2.bilateralFilter(img,8,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
+        19: cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        20: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        21: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
 
     }
     return switcher.get(argument, "Invalid method")
@@ -178,7 +196,7 @@ def get_Strings(image, gray):
     birthdays= []
     mrz1s=[]
     mrz2s=[]
-    for i in range(1,16):
+    for i in range(1,22):
         thresh = apply_threshold(img,gray,i)
         result = unicodedata.normalize("NFKD",pytesseract.image_to_string(thresh, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
         print('#=======================================================')
@@ -294,7 +312,6 @@ def name_extract(extracted_lines):
                     if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
                         cleanedLine=cleanedLine.replace(line[j],"")
                 words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
-                print(cleanedLine)
                 k=1
                 while(k<=len(words)-1):
                     if(len(words[len(words)-k])>2):
@@ -335,6 +352,8 @@ def first_name_extract(extracted_lines):
             else:
                 fname = "-1"
         j=j+1
+    if fname =="":
+        fname = "-1"
     if(fname!="-1" and fname[0]==" "):
         fname=fname.replace(fname[0],"")
     return fname
@@ -360,7 +379,7 @@ def id_extract(extracted_lines):
 def nationality_extract(extracted_lines):
     nationality="-1"
     for line in extracted_lines:
-        if ("National" in line or "alite" in line or " ation" in line or "onatite" in line):
+        if ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
             nationality = line.split(" ")[len(line.split(" "))-1]
 
             break
@@ -430,7 +449,7 @@ def gender_extract(extracted_lines):
 def mrz1_extract(extracted_lines):
     mrz="-1"
     for i in range(len(extracted_lines)):
-        line = extracted_lines[i]
+        line = extracted_lines[i].upper()
         if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
             mrz=line
             break
@@ -448,18 +467,34 @@ def mrz1_extract(extracted_lines):
 
 def mrz2_extract(extracted_lines):
     mrz="-1"  
-    for i in range(len(extracted_lines)):
-        line = extracted_lines[i]
+    for j in range(len(extracted_lines)):
+        line = extracted_lines[j].upper()
         word=line
         n_line=""
         for i in range(len(line)):
             if ((line[i]<'a'or line[i]>'z') and (line[i]<'A'or line[i]>'Z') and (line[i] != '<') and (line[i] <'0' or line[i]>'9')):
                 word=word.replace(line[i],"")
         n_line = n_line + word
-        if("<" in n_line and not("IDFRA" in n_line or "IOFRA" in n_line or "DFRA" in n_line or "OFRA" in n_line)):
-            mrz=n_line
-            break
-    return mrz
+        if("<<" in n_line and ("IDFRA" in n_line or "IOFRA" in n_line or "DFRA" in n_line or "OFRA" in n_line)):
+            print(extracted_lines[j])
+            print(n_line)
+            try:
+                mrz=extracted_lines[j+1]
+                break
+            except IndexError:
+                print("indexerror")
+                break
+    result=""
+    word=mrz
+    if not("-1" in mrz):
+        #clean the unnecessary caracters from the extracted str
+        for i in range(len(mrz)):
+            if ((mrz[i]<'a'or mrz[i]>'z') and (mrz[i]<'A'or mrz[i]>'Z') and (mrz[i] != '<') and (mrz[i] <'0' or mrz[i]>'9')):
+                word=word.replace(mrz[i],"")
+        result = result + word
+    else:
+        result = "-1"
+    return result
             
 
 def mean_length(words):
@@ -469,13 +504,30 @@ def mean_length(words):
     for word in words:
         if word != "-1":
             mean_lengths.append(len(word))
-        for length in mean_lengths:
-            if(max_occur<mean_lengths.count(length)):
-                max_occur=mean_lengths.count(length)
-                mean_length = length
-            if(type(mean_length)==type(" ")):
-                mean_length = 0
-    return mean_length	
+    for length in mean_lengths:
+        if(max_occur<mean_lengths.count(length)):
+            max_occur=mean_lengths.count(length)
+            mean_length = length
+        if(type(mean_length)==type(" ")):
+            mean_length = 0
+    return mean_length 
+
+def mean_length_mrz(words):
+    mean_lengths=[]
+    max_occur=0
+    mean_length=0
+    for word in words:
+        if word != "-1":
+            mean_lengths.append(len(word))
+    for length in mean_lengths:
+        if(length == 36):
+            return  length
+        if(max_occur<mean_lengths.count(length)):
+            max_occur=mean_lengths.count(length)
+            mean_length = length
+        if(type(mean_length)==type(" ")):
+            mean_length = 0
+    return mean_length  
 
 def mean_word(words):
     mean_len = mean_length(words)
@@ -485,14 +537,14 @@ def mean_word(words):
         for word in words:
             if len(word) == mean_len:
                 if word[i] in chars:
-                    if(words[11]==word or words[12]==word or words[14]==word):
+                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
                         chars[word[i]] =chars[word[i]] + 3
                     else:
-                        chars[word[i]] =chars[word[i]] + 1
-                elif(words[11]==word or words[12]==word or words[14]==word):
+                        chars[word[i]] =chars[word[i]] + 0.5
+                elif(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
                     chars[word[i]] = 3
                 else:
-                    chars[word[i]] = 1
+                    chars[word[i]] = 0.5
         max_val=-1
         key=""
         for c in chars:
@@ -504,8 +556,7 @@ def mean_word(words):
     return final_word
 
 def mean_mrz(words):
-    mean_len = mean_length(words)
-
+    mean_len = mean_length_mrz(words)
     final_word = ""
     for i in range(0,mean_len):
         chars={}        
@@ -565,10 +616,20 @@ ap.add_argument(
 FLAGS = ap.parse_args()
 save_result= not FLAGS.no_js
 result_folder=FLAGS.output
-
-# load the example image and convert it to grayscale
-img = cv2.imread(FLAGS.image)   
-img = rescaling(img,FLAGS.image)
+input_file = FLAGS.image
+delete = False
+if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
+    doc = fitz.open(input_file)
+    page = doc.loadPage(0) #number of page
+    pix = page.getPixmap()
+    input_file = detection_results_folder+"/pdfToimage.png"
+    pix.writePNG(input_file)
+    delete = True
+img = Image.open(input_file)
+img = trim(img)
+img = np.asarray(img)
+# load the example image and convert it to grayscale  
+img = rescaling(img,input_file)
 img = deskew(img) 
 gray = get_grayscale(img)
 img = remove_noise(gray)
@@ -584,6 +645,8 @@ else:
 
 #cv2.imshow('img', img)
 cv2.waitKey(100000)
+if delete :
+    os.remove(input_file)
 
 #3,5
 # show the output images
