@@ -58,7 +58,7 @@ def remove_noise(image):
     return img
  
 #thresholding with different filters
-def apply_threshold(img, argument):
+def apply_threshold(img,gray, argument):
     switcher = {
         1: cv2.threshold(cv2.GaussianBlur(img, (9, 9), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         2: cv2.threshold(cv2.GaussianBlur(img, (7, 7), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
@@ -69,8 +69,12 @@ def apply_threshold(img, argument):
         7: cv2.threshold(cv2.medianBlur(img, 5), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         8: cv2.threshold(cv2.medianBlur(img, 3), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         9: cv2.threshold(cv2.medianBlur(img, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        10: cv2.adaptiveThreshold(cv2.GaussianBlur(img, (5, 5), 0), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2),
-        11: cv2.adaptiveThreshold(cv2.medianBlur(img, 3), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2),
+        10: cv2.adaptiveThreshold(cv2.bilateralFilter(img,9,40,100), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
+        11: cv2.threshold(cv2.bilateralFilter(img,3,75,75), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        12: img,
+        13: gray,
+        14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 2),
+        15: cv2.threshold(cv2.medianBlur(gray, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
     }
     return switcher.get(argument, "Invalid method")
@@ -165,7 +169,7 @@ def clean_result(text):
 	return [line for line in lines if line.strip() != ""]
 
 
-def get_Strings(image):
+def get_Strings(image, gray):
     names = []
     fnames = []
     id_nbrs = []
@@ -174,9 +178,9 @@ def get_Strings(image):
     birthdays= []
     mrz1s=[]
     mrz2s=[]
-    for i in range(1,10):
-        thresh = apply_threshold(img,i)
-        result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
+    for i in range(1,16):
+        thresh = apply_threshold(img,gray,i)
+        result = unicodedata.normalize("NFKD",pytesseract.image_to_string(thresh, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
         print('#=======================================================')
         print("#=================== filter "+str(i)+" ===================")
         print('#=======================================================')
@@ -254,14 +258,51 @@ def name_extract(extracted_lines):
     name="-1"
     for i in range(len(extracted_lines)):
         line=extracted_lines[i]
-        if ("Nom" in line or "Mom" in line or " nom:" in line or "Non" in line or "non" in line):
-            name = line.split(":")[len(line.split(":"))-1].split(" ")[len(line.split(":")[len(line.split(":"))-1].split(" "))-1]
+        if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line)):
+            cleanedLine=line
+            for j in range(len(line)):
+                    if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
+                        cleanedLine=cleanedLine.replace(line[j],"")
+            words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
+            k=1
+            while(k<=len(words)-1):
+                if(len(words[len(words)-k])>2):
+                    name=words[len(words)-k]
+                k = k + 1
             break
-        elif ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
+        elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
             line=extracted_lines[i-1]
-            if("on"in line):
-                name = line.split(":")[len(line.split(":"))-1].split(" ")[len(line.split(":")[len(line.split(":"))-1].split(" "))-1]
+            cleanedLine=line
+            for j in range(len(line)):
+                if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
+                    cleanedLine=cleanedLine.replace(line[j],"")
+            words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
+            k=1
+            while(k<=len(words)-1):
+                if(len(words[len(words)-k])>2):
+                    name=words[len(words)-k]
+                k = k + 1
+            break
+        elif (("ationale" in line.lower()) or ("carte" in line.lower()) or (" identite" in line.lower())):
+            try:
+                line=extracted_lines[i+1]
+            except IndexError:
+                name ="-1"
+            else:
+                cleanedLine=line
+                for j in range(len(line)):
+                    if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
+                        cleanedLine=cleanedLine.replace(line[j],"")
+                words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
+                print(cleanedLine)
+                k=1
+                while(k<=len(words)-1):
+                    if(len(words[len(words)-k])>2):
+                        name=words[len(words)-k]
+                    k = k + 1
                 break
+    if(name==""):
+        name = "-1"
     return name
 
 #look for the first name(s) in the extracted lines using key words to locate it/them; it returns a str containing the first names separated with spaces
@@ -272,13 +313,13 @@ def first_name_extract(extracted_lines):
             name = line.split(":")[len(line.split(":"))-1]
             break
     names= name.split(" ")
-    fname=""
+    fname= ""
     l = len(names)
     j = 0
     while(j<l):
         word=names[j]
         #cleaning unnecessary words and spaces from the line
-        if("Pren" in word or "preno" in word or "Prenom" in word):
+        if("Pren" in word or "preno" in word or "Prenom" in word or "Pre" in word):
             names[j]=""
         if(names[j]==""):
             names.pop(j)
@@ -294,6 +335,8 @@ def first_name_extract(extracted_lines):
             else:
                 fname = "-1"
         j=j+1
+    if(fname!="-1" and fname[0]==" "):
+        fname=fname.replace(fname[0],"")
     return fname
 
 #look for the id in the extracted lines using key words to locate it; it returns a str
@@ -317,8 +360,9 @@ def id_extract(extracted_lines):
 def nationality_extract(extracted_lines):
     nationality="-1"
     for line in extracted_lines:
-        if ("National" in line or "alite" in line or " ation" in line or "tionatite"):
+        if ("National" in line or "alite" in line or " ation" in line or "onatite" in line):
             nationality = line.split(" ")[len(line.split(" "))-1]
+
             break
 
     return nationality
@@ -331,7 +375,7 @@ def birthday_extract(extracted_lines):
         #since the line containing the birthday tend to not be read correctly
         #it first look for the line containing the first name, then try
         #to locate the birthday in the line below it
-        if ("Pren" in line or "preno" in line or "Prenom" in line):
+        if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
             try:
                 words = extracted_lines[i+1].replace("."," ").split(" ")
             except IndexError:
@@ -360,8 +404,7 @@ def birthday_extract(extracted_lines):
                             bd="-1"
                             break
                 break
-            #however if the image is too small, they may not be any lines below the firstname, it then sends an error
-            
+            #however if the image is too small, they may not be any lines below the firstname, it then sends an error       
     return bd
 
 #look for the gender in the extracted lines using key words to locate it; it returns a str
@@ -372,7 +415,7 @@ def gender_extract(extracted_lines):
         #since the line containing the gender tend to not be read correctly
         #it first look for the line containing the first name, then try
         #to locate the gender in the line below it
-        if ("Pren" in line or "preno" in line or "Prenom" in line):
+        if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
             try:
                 words = extracted_lines[i+1].replace("."," ").split(" ")
                 for word in words:
@@ -442,7 +485,12 @@ def mean_word(words):
         for word in words:
             if len(word) == mean_len:
                 if word[i] in chars:
-                    chars[word[i]] =chars[word[i]] + 1
+                    if(words[11]==word or words[12]==word or words[14]==word):
+                        chars[word[i]] =chars[word[i]] + 3
+                    else:
+                        chars[word[i]] =chars[word[i]] + 1
+                elif(words[11]==word or words[12]==word or words[14]==word):
+                    chars[word[i]] = 3
                 else:
                     chars[word[i]] = 1
         max_val=-1
@@ -472,8 +520,10 @@ def mean_mrz(words):
         for c in chars:
             if c == "<" or c=="(" or c == "[" or c == "{":
                 key = "<"
+                break
             elif ((c == "S" or c == "C") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<")):
                 key = "<"
+                break
             elif chars[c]>=max_val:
                 max_val=chars[c]
                 key = c
@@ -520,9 +570,9 @@ result_folder=FLAGS.output
 img = cv2.imread(FLAGS.image)   
 img = rescaling(img,FLAGS.image)
 img = deskew(img) 
-img = get_grayscale(img)
-img = remove_noise(img)
-result = get_Strings(img)
+gray = get_grayscale(img)
+img = remove_noise(gray)
+result = get_Strings(img, gray)
 if save_result:
     detection_results_file = os.path.join(result_folder, "Detection_Results.json")
     with open(detection_results_file, 'w') as f:
