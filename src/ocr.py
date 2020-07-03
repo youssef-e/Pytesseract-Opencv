@@ -211,14 +211,15 @@ def get_Strings(image, gray):
         for line in lines:
             print(line)
             print("~~~~~~")
-        names.append(name_extract(lines))
-        fnames.append(first_name_extract(lines))
-        id_nbrs.append(id_extract(lines))
-        nationalities.append(nationality_extract(lines))
-        genders.append(gender_extract(lines))
-        birthdays.append(birthday_extract(lines))
-        mrz1s.append(mrz1_extract(lines))
-        mrz2s.append(mrz2_extract(lines))
+        idcard = fields_extract(lines)
+        names.append(idcard["name"])
+        fnames.append(idcard["fname"])
+        id_nbrs.append(idcard["id_nbr"])
+        nationalities.append(idcard["nationality"])
+        genders.append(idcard["gender"])
+        birthdays.append(idcard["birthday"])
+        mrz1s.append(idcard["mrz1"])
+        mrz2s.append(idcard["mrz2"])
         cv2.imshow('img'+str(i), thresh)
     
     #result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
@@ -263,65 +264,94 @@ def get_Strings(image, gray):
     y=json.dumps(x,sort_keys=True,indent=4)
     print(y)
     return x
+def clean_name(line):
+    name ="-1"
+    cleanedLine=line
+    for c in line:
+        if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
+            cleanedLine=cleanedLine.replace(c,"")
+    words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
+    k=1
+    while(k<=len(words)-1):
+        if(len(words[len(words)-k])>2):
+            name=words[len(words)-k]
+        k = k + 1
+    return name
 
+def is_found(string):
+    if("-1" in string):
+        return False
+    return True
 #look for the name in the extracted lines using key words to locate it; it returns a str
-def name_extract(extracted_lines):
-    name="-1"
+
+
+def fields_extract(extracted_lines):
+    fname="-1"
+    birthday = "-1"
+    name = "-1"
+    nationality = "-1"
+    gender = "-1"
+    id_nbr = "-1"
+    mrz1 = "-1"
+    mrz2 = "-1"
     for i, extracted_line in enumerate(extracted_lines):
         line = extracted_line
         if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line)):
-            cleanedLine=line
-            for c in line:
-                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
-                        cleanedLine=cleanedLine.replace(c,"")
-            words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
-            k=1
-            while(k<=len(words)-1):
-                if(len(words[len(words)-k])>2):
-                    name=words[len(words)-k]
-                k = k + 1
-            break
+            name=clean_name(line) if not is_found(name) else name
+      
         elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
-            line=extracted_lines[i-1]
-            cleanedLine=line
-            for c in line:
-                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
-                        cleanedLine=cleanedLine.replace(c,"")
-            words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
-            k=1
-            while(k<=len(words)-1):
-                if(len(words[len(words)-k])>2):
-                    name=words[len(words)-k]
-                k = k + 1
-            break
+            fname = first_name_extract(line) if not is_found(fname) else fname
+            name=clean_name(extracted_lines[i-1]) if not is_found(name) else name
+            try:
+                line=extracted_lines[i+1]
+            except IndexError:
+                birthday ="-1"
+                gender = "-1"
+            else:
+                birthday = birthday_extract(line) if not is_found(birthday) else birthday
+                gender = gender_extract(line) if not is_found(gender) else gender
+            
         elif (("ationale" in line.lower()) or ("carte" in line.lower()) or (" identite" in line.lower())):
+            id_nbr =id_extract(line) if not is_found(name) else name
             try:
                 line=extracted_lines[i+1]
             except IndexError:
                 name ="-1"
             else:
-                cleanedLine=line
-                for c in line:
-                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
-                        cleanedLine=cleanedLine.replace(c,"")
-                words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
-                k=1
-                while(k<=len(words)-1):
-                    if(len(words[len(words)-k])>2):
-                        name=words[len(words)-k]
-                    k = k + 1
-                break
-    if(name==""):
-        name = "-1"
-    return name
+                name = clean_name(line) if not is_found(name) else name
+        elif ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
+            nationality = nationality_extract(line) if not is_found(nationality) else nationality
+        else:
+            line=clean_mrz(line).upper()
+            if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
+                mrz1 = mrz1_extract(line) if not is_found(mrz1) else mrz1
+                try:
+                    line=extracted_lines[i+1]
+                except IndexError:
+                    mrz2 ="-1"
+                    print("mrz2 not found")
+                else:
+                    mrz2 = mrz2_extract(line) if not is_found(mrz2) else mrz2
+    result = {
+    "name" : name,
+    "fname" : fname,
+    "id_nbr" : id_nbr,
+    "nationality" : nationality,
+    "gender" : gender,
+    "birthday" : birthday,
+    "mrz1" : mrz1,
+    "mrz2" : mrz2
+    }
+            
+    for i,(k,v) in enumerate(result.items()):
+        result[k]="-1" if v == "" else result[k]
+    return result
 
 #look for the first name(s) in the extracted lines using key words to locate it/them; it returns a str containing the first names separated with spaces
-def first_name_extract(extracted_lines):
+def first_name_extract(line):
     name="-1"
-    for line in extracted_lines:
-        if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
-            name = line.split(":")[len(line.split(":"))-1]
-            break
+    if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
+        name = line.split(":")[len(line.split(":"))-1]
     names= name.split(" ")
     fname= ""
     l = len(names)
@@ -363,137 +393,107 @@ def first_name_extract(extracted_lines):
     return fname
 
 #look for the id in the extracted lines using key words to locate it; it returns a str
-def id_extract(extracted_lines):
+def id_extract(line):
     id_nbr="-1"
-    for line in extracted_lines:
-        if ("ationale" in line.lower() or "carte" in line.lower() or " identite" in line.lower()):
-            id_nbrs = line.split(" ")
-            for value in id_nbrs:
-                for c in value:
+    if ("ationale" in line.lower() or "carte" in line.lower() or " identite" in line.lower()):
+        id_nbrs = line.split(" ")
+        for value in id_nbrs:
+            notFound = True
+            for c in value:
+                if notFound :
                     if(c>='0' and c<='9'):
-                        id_nbr=value                   
+                        id_nbr=value
+                        notFound = False                   
                         break
                     else:
                         break
-            break
 
     return id_nbr
 
 #look for the nationality in the extracted lines using key words to locate it; it returns a str
-def nationality_extract(extracted_lines):
+def nationality_extract(line):
     nationality="-1"
-    for line in extracted_lines:
-        if ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
-            nationality = line.split(" ")[len(line.split(" "))-1]
-
-            break
-
+    if ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
+        nationality = line.split(" ")[len(line.split(" "))-1]
     return nationality
 
 #look for the birthday in the extracted lines using key words to locate it; it returns a str
-def birthday_extract(extracted_lines):
+def birthday_extract(extracted_line):
     result="-1"
-    for i, extracted_line in enumerate(extracted_lines):
-        line = extracted_line
-        #since the line containing the birthday tend to not be read correctly
-        #it first look for the line containing the first name, then try
-        #to locate the birthday in the line below it
-        if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
-            try:
-                words = extracted_lines[i+1].replace("."," ").split(" ")
-            except IndexError:
-                print("Ocr not accurate enough")
-            else:
-                clean_line=[]
-                #the extracted line then need to be cleaned of non alphanumerical caractere to normilize the date format
-                for word in words:
-                    clean_word=word
-                    for c in word:
-                        if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c <'0' or c>'9')):
-                            clean_word = clean_word.replace(c," ")
-                    w = word.split(" ")
-                    for value in w:
-                        if value !="":
-                            clean_line.append(value)
-                #it then can extract the date        
-                try:
-                    result = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
-                except IndexError:
-                    result="-1"
-                    break
-                else:
-                    for c in result:
-                        if((c <'0' or c>'9') and (c!=" ")):
-                            result="-1"
-                            break
+    line = extracted_line
+    #since the line containing the birthday tend to not be read correctly
+    #it first look for the line containing the first name, then try
+    #to locate the birthday in the line below it
+    words = line.replace("."," ").split(" ")
+    clean_line=[]
+    #the extracted line then need to be cleaned of non alphanumerical caractere to normilize the date format
+    for word in words:
+        clean_word=word
+        for c in word:
+            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c <'0' or c>'9')):
+                clean_word = clean_word.replace(c," ")
+        w = word.split(" ")
+        for value in w:
+            if value !="":
+                clean_line.append(value)
+    #it then can extract the date        
+    try:
+        result = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
+    except IndexError:
+        result="-1"
+    else:
+        for c in result:
+            if((c <'0' or c>'9') and (c!=" ")):
+                result="-1"
                 break
-            #however if the image is too small, they may not be any lines below the firstname, it then sends an error       
+    #however if the image is too small, they may not be any lines below the firstname, it then sends an error       
     return result
 
 #look for the gender in the extracted lines using key words to locate it; it returns a str
-def gender_extract(extracted_lines):
-    gender = "-1"
-    for i, extracted_line in enumerate(extracted_lines):
-        line = extracted_line
-        #since the line containing the gender tend to not be read correctly
-        #it first look for the line containing the first name, then try
-        #to locate the gender in the line below it
-        if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
-            try:
-                words = extracted_lines[i+1].replace("."," ").split(" ")
-                for word in words:
-                    if(word == "M" or word =="F"):
-                        gender = word
-                        break
-            #however if the image is too small, they may not be any lines below the firstname, it then sends an error
-            except IndexError:
-                print("Ocr not accurate enough")
-    return gender    
-#look for the mrz in the extracted lines using key words to locate it; it returns a list of str
-def mrz1_extract(extracted_lines):
-    mrz="-1"
-    for line in extracted_lines:
-        line = line.upper()
-        if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
-            mrz=line
+def gender_extract(extracted_line):
+    gender = "-1"    
+    line = extracted_line
+    #since the line containing the gender tend to not be read correctly
+    #it first look for the line containing the first name, then try
+    #to locate the gender in the line below it
+    words = line.replace("."," ").split(" ")
+    for word in words:
+        if(word == "M" or word =="F"):
+            gender = word
             break
+    return gender    
+
+def clean_mrz(line):
+    word = line
+    result =""
+    for c in line:
+        if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
+            word=word.replace(c,"")
+    result = result + word
+    return result
+
+#look for the mrz in the extracted lines using key words to locate it; it returns a list of str
+def mrz1_extract(extracted_line):
+    mrz="-1"
+    line = extracted_line.upper()
+    if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
+        mrz=line
     result=""
-    word=mrz
     if ("-1" not in mrz):
         #clean the unnecessary caracters from the extracted str
-        for c in mrz:
-            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
-                word=word.replace(c,"")
-        result = result + word
+        result = clean_mrz(mrz)
     else:
         result = "-1"
     return result
 
-def mrz2_extract(extracted_lines):
+def mrz2_extract(extracted_line):
     mrz="-1"  
-    for j, extracted_line in enumerate(extracted_lines):
-        line = extracted_line.upper()
-        word=line
-        n_line=""
-        for c in line:
-            if ((c <'a'or c >'z') and ( c <'A'or c >'Z') and (c != '<') and (c <'0' or c >'9')):
-                word=word.replace(c,"")
-        n_line = n_line + word
-        if("<<" in n_line and ("IDFRA" in n_line or "IOFRA" in n_line or "DFRA" in n_line or "OFRA" in n_line)):
-            try:
-                mrz=extracted_lines[j+1]
-                break
-            except IndexError:
-                print("indexerror")
-                break
+    line = extracted_line.upper()
+    word=clean_mrz(line)
     result=""
-    word=mrz
-    if ("-1" not in mrz):
+    if ("-1" not in word):
         #clean the unnecessary caracters from the extracted str
-        for c in mrz:
-            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
-                word=word.replace(c,"")
-        result = result + word
+        result = clean_mrz(word)
     else:
         result = "-1"
     return result
