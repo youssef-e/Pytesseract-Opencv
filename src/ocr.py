@@ -322,7 +322,7 @@ def fields_extract(extracted_lines):
         elif ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
             nationality = nationality_extract(line) if not is_found(nationality) else nationality
         else:
-            line=clean_mrz(line).upper()
+            line=clean_alphanum(line).upper()
             if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
                 mrz1 = mrz1_extract(line) if not is_found(mrz1) else mrz1
                 try:
@@ -424,18 +424,12 @@ def birthday_extract(extracted_line):
     #since the line containing the birthday tend to not be read correctly
     #it first look for the line containing the first name, then try
     #to locate the birthday in the line below it
-    words = line.replace("."," ").split(" ")
+    line = clean_alphanum(line, " ")
+    words = line.split(" ")
     clean_line=[]
-    #the extracted line then need to be cleaned of non alphanumerical caractere to normilize the date format
-    for word in words:
-        clean_word=word
-        for c in word:
-            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c <'0' or c>'9')):
-                clean_word = clean_word.replace(c," ")
-        w = word.split(" ")
-        for value in w:
-            if value !="":
-                clean_line.append(value)
+    for value in words:
+        if value !="":
+            clean_line.append(value)
     #it then can extract the date        
     try:
         result = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
@@ -444,8 +438,9 @@ def birthday_extract(extracted_line):
     else:
         for c in result:
             if((c <'0' or c>'9') and (c!=" ")):
-                result="-1"
-                break
+                result=result.replace(c,"")
+        if len(result)!= 10:
+            result ="-1"
     #however if the image is too small, they may not be any lines below the firstname, it then sends an error       
     return result
 
@@ -463,12 +458,12 @@ def gender_extract(extracted_line):
             break
     return gender    
 
-def clean_mrz(line):
+def clean_alphanum(line,replacement = ""):
     word = line
     result =""
     for c in line:
         if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
-            word=word.replace(c,"")
+            word=word.replace(c,replacement)
     result = result + word
     return result
 
@@ -481,7 +476,7 @@ def mrz1_extract(extracted_line):
     result=""
     if ("-1" not in mrz):
         #clean the unnecessary caracters from the extracted str
-        result = clean_mrz(mrz)
+        result = clean_alphanum(mrz)
     else:
         result = "-1"
     return result
@@ -489,11 +484,11 @@ def mrz1_extract(extracted_line):
 def mrz2_extract(extracted_line):
     mrz="-1"  
     line = extracted_line.upper()
-    word=clean_mrz(line)
+    word=clean_alphanum(line)
     result=""
     if ("-1" not in word):
         #clean the unnecessary caracters from the extracted str
-        result = clean_mrz(word)
+        result = clean_alphanum(word)
     else:
         result = "-1"
     return result
