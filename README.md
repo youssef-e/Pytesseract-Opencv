@@ -1,4 +1,3 @@
-# Pytesseract-yolo
+# Pytesseract-Opencv
 
-An OCR that extract data from ID card using Yolo and Tesseract (the yolo part is not integrated yet)
-
+An OCR that extract data from ID card using Opencv and Tesseract 
