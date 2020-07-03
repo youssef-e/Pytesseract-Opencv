@@ -44,6 +44,8 @@ def rescaling(image, imagename):
     image = cv2.imread(imagename)
     print(image.shape)
     d=(1024,768)
+    if image.shape[0] > image.shape[1]:
+        image=deskew(image)
     if image.shape[0] == image.shape[1]:
         scale_percent = int(900 * 100 /image.shape[0]) # percent of original size
         width = int(image.shape[1] * scale_percent / 100)
@@ -72,27 +74,27 @@ def remove_noise(image):
 def apply_threshold(img,gray, argument):
     kernel = np.ones((1,1), np.uint8)
     switcher = {
-        1: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        2: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        3: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        4: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        5: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        1: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        2: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        3: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        4: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        5: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         6: cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        7: cv2.threshold(cv2.medianBlur(img, 5), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        8: cv2.threshold(cv2.medianBlur(img, 3), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        9: cv2.threshold(cv2.medianBlur(img, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        7: cv2.threshold(cv2.medianBlur(img, 5), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        8: cv2.threshold(cv2.medianBlur(img, 3), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        9: cv2.threshold(cv2.medianBlur(img, 1), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         10: cv2.adaptiveThreshold(cv2.bilateralFilter(img,9,40,100), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
-        11: cv2.threshold(cv2.bilateralFilter(img,3,75,75), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        11: cv2.threshold(cv2.bilateralFilter(img,3,75,75),127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         12: img,
         13: gray,
-        14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 2),
-        15: cv2.threshold(cv2.medianBlur(gray, 1), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        16: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
-        17: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
+        14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
+        15: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,8,75,75), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 2),
+        16: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2),
+        17: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,3,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
         18: cv2.adaptiveThreshold(cv2.bilateralFilter(img,8,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
-        19: cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        20: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        21: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        19: cv2.morphologyEx(cv2.adaptiveThreshold(cv2.bilateralFilter(img,8,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),cv2.MORPH_CLOSE, kernel),
+        20: cv2.threshold(img,127,255,cv2.THRESH_TOZERO)[1]
+
 
     }
     return switcher.get(argument, "Invalid method")
@@ -182,8 +184,8 @@ def deskew(image):
         return image
 
 #clean the text from empty lines
-def clean_result(text):
-	lines=text.split('\n')
+def clean_result(text,char):
+	lines=text.split(char)
 	return [line for line in lines if line.strip() != ""]
 
 
@@ -196,14 +198,15 @@ def get_Strings(image, gray):
     birthdays= []
     mrz1s=[]
     mrz2s=[]
-    for i in range(1,22):
+    for i in range(1,21):
         thresh = apply_threshold(img,gray,i)
-        result = unicodedata.normalize("NFKD",pytesseract.image_to_string(thresh, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
+        result = pytesseract.image_to_string(thresh, lang='fra')
+        result= unicodedata.normalize("NFKD",result).encode('ascii', 'ignore').decode('ascii')
         print('#=======================================================')
         print("#=================== filter "+str(i)+" ===================")
         print('#=======================================================')
         #print(result)
-        lines= clean_result(result)
+        lines= clean_result(result, '\n')
         for line in lines:
             print(line)
             print("~~~~~~")
@@ -219,7 +222,7 @@ def get_Strings(image, gray):
     
     """ 
     image = apply_threshold(img,6)
-    result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore')
+    result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
     lines= clean_result(result)
     for line in lines:
         print(line)
@@ -233,29 +236,29 @@ def get_Strings(image, gray):
     print('#==================== extracted data ===================')
     print('#=======================================================')
     print("~~~~~~~~ names ~~~~~~~")
-    for name in names:
-        print(name+" len: "+ str(len(name)))
+    for i in range(len(names)):
+        print(str(i+1)+": "+names[i]+" len: "+ str(len(names[i])))
     print("~~~~~~~~ fnames ~~~~~~~")
-    for name in fnames:
-        print(name+" len: "+ str(len(name)))
+    for i in range(len(fnames)):
+        print(str(i+1)+": "+fnames[i]+" len: "+ str(len(fnames[i])))
     print("~~~~~~~~ id nbrs ~~~~~~~")
-    for id_nbr in id_nbrs:
-        print(id_nbr+" len: "+ str(len(id_nbr)))
+    for i in range(len(id_nbrs)):
+        print(str(i+1)+": "+id_nbrs[i]+" len: "+ str(len(id_nbrs[i])))
     print("~~~~~~~~ nationality ~~~~~~~")
-    for nationality in nationalities:
-        print(nationality+" len: "+str(len(nationality)))
+    for i in range(len(nationalities)):
+        print(str(i+1)+": "+nationalities[i]+" len: "+str(len(nationalities[i])))
     print("~~~~~~~~ gender ~~~~~~~")
-    for gender in genders:
-        print(gender+" len: "+str(len(gender)))
+    for i in range(len(genders)):
+        print(str(i+1)+": "+genders[i]+" len: "+str(len(genders[i])))
     print("~~~~~~~~ birthday ~~~~~~~")
-    for birthday in birthdays:
-        print(birthday+" len: "+str(len(birthday)))
+    for i in range(len(birthdays)):
+        print(str(i+1)+": "+birthdays[i]+" len: "+str(len(birthdays[i])))
     print("~~~~~~~~ mrz 1 ~~~~~~~")
-    for mrz in mrz1s:
-        print(mrz+" len: "+str(len(mrz)))
+    for i in range(len(mrz1s)):
+        print(str(i+1)+": "+mrz1s[i]+" len: "+str(len(mrz1s[i])))
     print("~~~~~~~~ mrz 2 ~~~~~~~")
-    for mrz in mrz2s:
-        print(mrz+" len: "+str(len(mrz)))
+    for i in range(len(mrz2s)):
+        print(str(i+1)+": "+mrz2s[i]+" len: "+str(len(mrz2s[i])))
     
     x = {
     "Name" : mean_word(names),
@@ -348,14 +351,25 @@ def first_name_extract(extracted_lines):
                 for i in range(len(names[j])):
                     if ((names[j][i]<'a'or names[j][i]>'z') and (names[j][i]<'A'or names[j][i]>'Z') and (names[j][i] != '-')):
                         word=word.replace(names[j][i],"")
-                fname = fname + word + " "
+                if word != "":
+                    fname = fname + word + " "
             else:
                 fname = "-1"
         j=j+1
     if fname =="":
         fname = "-1"
-    if(fname!="-1" and fname[0]==" "):
-        fname=fname.replace(fname[0],"")
+    if (fname !="-1"):
+        if(fname[0]==" "):    
+            fname=fname.replace(fname[0],"")
+        l=len(fname)
+        i=l-1
+        while(i<l):
+            if((fname[i]<'a' or fname[i]>'z') and (fname[i]<'A' or fname[i]>'Z')):
+                fname=fname[:i]
+                l=len(fname)
+                i=l-1
+            else:
+                break
     return fname
 
 #look for the id in the extracted lines using key words to locate it; it returns a str
@@ -476,8 +490,6 @@ def mrz2_extract(extracted_lines):
                 word=word.replace(line[i],"")
         n_line = n_line + word
         if("<<" in n_line and ("IDFRA" in n_line or "IOFRA" in n_line or "DFRA" in n_line or "OFRA" in n_line)):
-            print(extracted_lines[j])
-            print(n_line)
             try:
                 mrz=extracted_lines[j+1]
                 break
@@ -541,10 +553,11 @@ def mean_word(words):
                         chars[word[i]] =chars[word[i]] + 3
                     else:
                         chars[word[i]] =chars[word[i]] + 0.5
-                elif(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
-                    chars[word[i]] = 3
                 else:
-                    chars[word[i]] = 0.5
+                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
+                        chars[word[i]] = 3
+                    else:
+                        chars[word[i]] = 0.5
         max_val=-1
         key=""
         for c in chars:
@@ -552,7 +565,6 @@ def mean_word(words):
                 max_val=chars[c]
                 key = c
         final_word = final_word + key 
-    print("final word : "+final_word)
     return final_word
 
 def mean_mrz(words):
@@ -563,9 +575,15 @@ def mean_mrz(words):
         for word in words:
             if len(word) == mean_len:
                 if word[i] in chars:
-                    chars[word[i]] = chars[word[i]] + 1
+                    if(len(words)>16 and (words[17]==word)):
+                        chars[word[i]] =chars[word[i]] + 3
+                    else:
+                        chars[word[i]] = chars[word[i]] + 1
                 else:
-                    chars[word[i]] = 1
+                    if(len(words)>16 and (words[17]==word)):
+                        chars[word[i]] = 3
+                    else:
+                        chars[word[i]] = 1
         max_val=-1
         key=""
         for c in chars:
@@ -579,7 +597,6 @@ def mean_mrz(words):
                 max_val=chars[c]
                 key = c
         final_word = final_word + key 
-    print("MRZ :\n"+final_word)
     return final_word
 
 
@@ -611,13 +628,15 @@ ap.add_argument(
         help="Output path for detection results. Default is "
         + detection_results_folder,
     )
-
-
 FLAGS = ap.parse_args()
+
+#declaration of variables
 save_result= not FLAGS.no_js
 result_folder=FLAGS.output
 input_file = FLAGS.image
 delete = False
+
+#detect if the input file is a pdf, and if it is, covert it to png
 if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
     doc = fitz.open(input_file)
     page = doc.loadPage(0) #number of page
@@ -625,10 +644,12 @@ if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
     input_file = detection_results_folder+"/pdfToimage.png"
     pix.writePNG(input_file)
     delete = True
+#read and trim the image from white borders
 img = Image.open(input_file)
 img = trim(img)
 img = np.asarray(img)
-# load the example image and convert it to grayscale  
+cv2.imshow('trimmed',img)
+# 
 img = rescaling(img,input_file)
 img = deskew(img) 
 gray = get_grayscale(img)
