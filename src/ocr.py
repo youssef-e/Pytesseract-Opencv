@@ -3,7 +3,7 @@ import unicodedata
 from PIL import Image, ImageChops
 import pytesseract
 import argparse
-from cv2 import *
+import cv2
 import os
 import numpy as np
 import re
@@ -23,8 +23,7 @@ def trim(im):
     bbox = diff.getbbox()
     if bbox:
         return im.crop(bbox)
-    else:
-        return im
+    return im
 
 def get_parent_dir(n=1):
     """ returns the n-th parent dicrectory of the current
@@ -183,9 +182,7 @@ def deskew(image):
         img_pil = img_pil.rotate(angle, expand=True)
         #convert the pil image to cv2 image
         image = np.asarray(img_pil)
-    
-    finally:
-        return image
+    return image
 
 #clean the text from empty lines
 def clean_result(text,char):
@@ -224,16 +221,7 @@ def get_Strings(image, gray):
         mrz2s.append(mrz2_extract(lines))
         cv2.imshow('img'+str(i), thresh)
     
-    """ image = apply_threshold(img,6)
-    result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
-    lines= clean_result(result)
-    for line in lines:
-        print(line)
-        print("~~~~~~")
-    names.append(name_extract(lines))
-    fnames.append(first_name_extract(lines))
-        #if(i==1)
-    cv2.imshow('img',image)"""
+    #result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
     print('#=======================================================')
     print('#==================== extracted data ===================')
     print('#=======================================================')
@@ -279,8 +267,8 @@ def get_Strings(image, gray):
 #look for the name in the extracted lines using key words to locate it; it returns a str
 def name_extract(extracted_lines):
     name="-1"
-    for i in range(len(extracted_lines)):
-        line=extracted_lines[i]
+    for i, extracted_line in enumerate(extracted_lines):
+        line = extracted_line
         if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line)):
             cleanedLine=line
             for c in line:
@@ -405,8 +393,8 @@ def nationality_extract(extracted_lines):
 #look for the birthday in the extracted lines using key words to locate it; it returns a str
 def birthday_extract(extracted_lines):
     result="-1"
-    for i in range(len(extracted_lines)):
-        line = extracted_lines[i]
+    for i, extracted_line in enumerate(extracted_lines):
+        line = extracted_line
         #since the line containing the birthday tend to not be read correctly
         #it first look for the line containing the first name, then try
         #to locate the birthday in the line below it
@@ -445,8 +433,8 @@ def birthday_extract(extracted_lines):
 #look for the gender in the extracted lines using key words to locate it; it returns a str
 def gender_extract(extracted_lines):
     gender = "-1"
-    for i in range(len(extracted_lines)):
-        line = extracted_lines[i]
+    for i, extracted_line in enumerate(extracted_lines):
+        line = extracted_line
         #since the line containing the gender tend to not be read correctly
         #it first look for the line containing the first name, then try
         #to locate the gender in the line below it
@@ -483,8 +471,8 @@ def mrz1_extract(extracted_lines):
 
 def mrz2_extract(extracted_lines):
     mrz="-1"  
-    for j in range(len(extracted_lines)):
-        line = extracted_lines[j].upper()
+    for j, extracted_line in enumerate(extracted_lines):
+        line = extracted_line.upper()
         word=line
         n_line=""
         for c in line:
