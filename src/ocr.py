@@ -23,6 +23,8 @@ def trim(im):
     bbox = diff.getbbox()
     if bbox:
         return im.crop(bbox)
+    else:
+        return im
 
 def get_parent_dir(n=1):
     """ returns the n-th parent dicrectory of the current
@@ -157,7 +159,7 @@ def deskew(image):
             img_pil = img_pil.rotate(median_angle, expand=True)
         #convert the pil image to cv2 image
         image = np.asarray(img_pil)
-    except:
+    except TypeError:
         print("image too small to deskew")    
     #this bit detect if the image is upside down or at 90 or 270 degree
     #then rotate it
@@ -166,6 +168,9 @@ def deskew(image):
         gray = cv2.bitwise_not(gray)
         #use tesseract image_to_osd method to detect angles of rotation
         rot_data = pytesseract.image_to_osd(image, lang='fra')
+    except pytesseract.pytesseract.TesseractError:
+        print("Too few characters/resolution in image to osd")
+    else:
         print("[OSD] "+rot_data)
         rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
         #calculation of the correction angle
@@ -178,8 +183,7 @@ def deskew(image):
         img_pil = img_pil.rotate(angle, expand=True)
         #convert the pil image to cv2 image
         image = np.asarray(img_pil)
-    except:
-        print("Too few characters/resolution in image to osd")
+    
     finally:
         return image
 
@@ -220,8 +224,7 @@ def get_Strings(image, gray):
         mrz2s.append(mrz2_extract(lines))
         cv2.imshow('img'+str(i), thresh)
     
-    """ 
-    image = apply_threshold(img,6)
+    """ image = apply_threshold(img,6)
     result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
     lines= clean_result(result)
     for line in lines:
@@ -230,35 +233,34 @@ def get_Strings(image, gray):
     names.append(name_extract(lines))
     fnames.append(first_name_extract(lines))
         #if(i==1)
-    cv2.imshow('img',image)
-    """
+    cv2.imshow('img',image)"""
     print('#=======================================================')
     print('#==================== extracted data ===================')
     print('#=======================================================')
     print("~~~~~~~~ names ~~~~~~~")
-    for i in range(len(names)):
-        print(str(i+1)+": "+names[i]+" len: "+ str(len(names[i])))
+    for i, name in enumerate(names,1):
+        print(str(i)+": "+name+" len: "+ str(len(name)))
     print("~~~~~~~~ fnames ~~~~~~~")
-    for i in range(len(fnames)):
-        print(str(i+1)+": "+fnames[i]+" len: "+ str(len(fnames[i])))
+    for i, fname in enumerate(fnames,1):
+        print(str(i)+": "+fname+" len: "+ str(len(fname)))
     print("~~~~~~~~ id nbrs ~~~~~~~")
-    for i in range(len(id_nbrs)):
-        print(str(i+1)+": "+id_nbrs[i]+" len: "+ str(len(id_nbrs[i])))
+    for i, id_nbr in enumerate(id_nbrs,1):
+        print(str(i)+": "+id_nbr+" len: "+ str(len(id_nbr)))
     print("~~~~~~~~ nationality ~~~~~~~")
-    for i in range(len(nationalities)):
-        print(str(i+1)+": "+nationalities[i]+" len: "+str(len(nationalities[i])))
+    for i, nationality in enumerate(nationalities,1):
+        print(str(i)+": "+nationality+" len: "+str(len(nationality)))
     print("~~~~~~~~ gender ~~~~~~~")
-    for i in range(len(genders)):
-        print(str(i+1)+": "+genders[i]+" len: "+str(len(genders[i])))
+    for i, gender in enumerate(genders,1):
+        print(str(i)+": "+gender+" len: "+str(len(genders)))
     print("~~~~~~~~ birthday ~~~~~~~")
-    for i in range(len(birthdays)):
-        print(str(i+1)+": "+birthdays[i]+" len: "+str(len(birthdays[i])))
+    for i, birthday in enumerate(birthdays,1):
+        print(str(i)+": "+birthday+" len: "+str(len(birthday)))
     print("~~~~~~~~ mrz 1 ~~~~~~~")
-    for i in range(len(mrz1s)):
-        print(str(i+1)+": "+mrz1s[i]+" len: "+str(len(mrz1s[i])))
+    for i, mrz1 in enumerate(mrz1s,1):
+        print(str(i)+": "+mrz1+" len: "+str(len(mrz1)))
     print("~~~~~~~~ mrz 2 ~~~~~~~")
-    for i in range(len(mrz2s)):
-        print(str(i+1)+": "+mrz2s[i]+" len: "+str(len(mrz2s[i])))
+    for i, mrz2 in enumerate(mrz2s,1):
+        print(str(i)+": "+mrz2+" len: "+str(len(mrz2)))
     
     x = {
     "Name" : mean_word(names),
@@ -281,9 +283,9 @@ def name_extract(extracted_lines):
         line=extracted_lines[i]
         if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line)):
             cleanedLine=line
-            for j in range(len(line)):
-                    if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
-                        cleanedLine=cleanedLine.replace(line[j],"")
+            for c in line:
+                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
+                        cleanedLine=cleanedLine.replace(c,"")
             words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
             k=1
             while(k<=len(words)-1):
@@ -294,9 +296,9 @@ def name_extract(extracted_lines):
         elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
             line=extracted_lines[i-1]
             cleanedLine=line
-            for j in range(len(line)):
-                if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
-                    cleanedLine=cleanedLine.replace(line[j],"")
+            for c in line:
+                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
+                        cleanedLine=cleanedLine.replace(c,"")
             words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
             k=1
             while(k<=len(words)-1):
@@ -311,9 +313,9 @@ def name_extract(extracted_lines):
                 name ="-1"
             else:
                 cleanedLine=line
-                for j in range(len(line)):
-                    if ((line[j]<'a'or line[j]>'z') and (line[j]<'A'or line[j]>'Z') and (line[j] != '-') and(line[j]!=" ") and(line[j]!= ":")):
-                        cleanedLine=cleanedLine.replace(line[j],"")
+                for c in line:
+                    if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '-') and(c !=" ") and(c!= ":")):
+                        cleanedLine=cleanedLine.replace(c,"")
                 words = cleanedLine.split(":")[len(cleanedLine.split(":"))-1].split(" ")
                 k=1
                 while(k<=len(words)-1):
@@ -346,7 +348,7 @@ def first_name_extract(extracted_lines):
             j=j-1
             l=l-1
         else:
-            if not("-1" in names[j]):
+            if ("-1" not in names[j]):
                 #clean the unnecessary caracters from the extracted name(s)
                 for i in range(len(names[j])):
                     if ((names[j][i]<'a'or names[j][i]>'z') and (names[j][i]<'A'or names[j][i]>'Z') and (names[j][i] != '-')):
@@ -379,8 +381,8 @@ def id_extract(extracted_lines):
         if ("ationale" in line.lower() or "carte" in line.lower() or " identite" in line.lower()):
             id_nbrs = line.split(" ")
             for value in id_nbrs:
-                for i in range(len(value)):
-                    if(value[i]>='0' and value[i]<='9'):
+                for c in value:
+                    if(c>='0' and c<='9'):
                         id_nbr=value                   
                         break
                     else:
@@ -402,7 +404,7 @@ def nationality_extract(extracted_lines):
 
 #look for the birthday in the extracted lines using key words to locate it; it returns a str
 def birthday_extract(extracted_lines):
-    bd="-1"
+    result="-1"
     for i in range(len(extracted_lines)):
         line = extracted_lines[i]
         #since the line containing the birthday tend to not be read correctly
@@ -416,29 +418,29 @@ def birthday_extract(extracted_lines):
             else:
                 clean_line=[]
                 #the extracted line then need to be cleaned of non alphanumerical caractere to normilize the date format
-                for j in range(len(words)):
-                    word=words[j]
-                    for k in range(len(words[j])):
-                        if ((words[j][k]<'a'or words[j][k]>'z') and (words[j][k]<'A'or words[j][k]>'Z') and (words[j][k] <'0' or words[j][k]>'9')):
-                            word = word.replace(words[j][k]," ")
+                for word in words:
+                    clean_word=word
+                    for c in word:
+                        if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c <'0' or c>'9')):
+                            clean_word = clean_word.replace(c," ")
                     w = word.split(" ")
                     for value in w:
                         if value !="":
                             clean_line.append(value)
                 #it then can extract the date        
                 try:
-                    bd = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
+                    result = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
                 except IndexError:
-                    bd="-1"
+                    result="-1"
                     break
                 else:
-                    for i in range(0,len(bd)):
-                        if((bd[i] <'0' or bd[i]>'9') and (bd[i]!=" ")):
-                            bd="-1"
+                    for c in result:
+                        if((c <'0' or c>'9') and (c!=" ")):
+                            result="-1"
                             break
                 break
             #however if the image is too small, they may not be any lines below the firstname, it then sends an error       
-    return bd
+    return result
 
 #look for the gender in the extracted lines using key words to locate it; it returns a str
 def gender_extract(extracted_lines):
@@ -462,18 +464,18 @@ def gender_extract(extracted_lines):
 #look for the mrz in the extracted lines using key words to locate it; it returns a list of str
 def mrz1_extract(extracted_lines):
     mrz="-1"
-    for i in range(len(extracted_lines)):
-        line = extracted_lines[i].upper()
+    for line in extracted_lines:
+        line = line.upper()
         if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
             mrz=line
             break
     result=""
     word=mrz
-    if not("-1" in mrz):
+    if ("-1" not in mrz):
         #clean the unnecessary caracters from the extracted str
-        for i in range(len(mrz)):
-            if ((mrz[i]<'a'or mrz[i]>'z') and (mrz[i]<'A'or mrz[i]>'Z') and (mrz[i] != '<') and (mrz[i] <'0' or mrz[i]>'9')):
-                word=word.replace(mrz[i],"")
+        for c in mrz:
+            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
+                word=word.replace(c,"")
         result = result + word
     else:
         result = "-1"
@@ -485,9 +487,9 @@ def mrz2_extract(extracted_lines):
         line = extracted_lines[j].upper()
         word=line
         n_line=""
-        for i in range(len(line)):
-            if ((line[i]<'a'or line[i]>'z') and (line[i]<'A'or line[i]>'Z') and (line[i] != '<') and (line[i] <'0' or line[i]>'9')):
-                word=word.replace(line[i],"")
+        for c in line:
+            if ((c <'a'or c >'z') and ( c <'A'or c >'Z') and (c != '<') and (c <'0' or c >'9')):
+                word=word.replace(c,"")
         n_line = n_line + word
         if("<<" in n_line and ("IDFRA" in n_line or "IOFRA" in n_line or "DFRA" in n_line or "OFRA" in n_line)):
             try:
@@ -498,11 +500,11 @@ def mrz2_extract(extracted_lines):
                 break
     result=""
     word=mrz
-    if not("-1" in mrz):
+    if ("-1" not in mrz):
         #clean the unnecessary caracters from the extracted str
-        for i in range(len(mrz)):
-            if ((mrz[i]<'a'or mrz[i]>'z') and (mrz[i]<'A'or mrz[i]>'Z') and (mrz[i] != '<') and (mrz[i] <'0' or mrz[i]>'9')):
-                word=word.replace(mrz[i],"")
+        for c in mrz:
+            if ((c<'a'or c>'z') and (c<'A'or c>'Z') and (c != '<') and (c <'0' or c >'9')):
+                word=word.replace(c,"")
         result = result + word
     else:
         result = "-1"
@@ -520,7 +522,7 @@ def mean_length(words):
         if(max_occur<mean_lengths.count(length)):
             max_occur=mean_lengths.count(length)
             mean_length = length
-        if(type(mean_length)==type(" ")):
+        if(isinstance(mean_length,str)):
             mean_length = 0
     return mean_length 
 
@@ -537,14 +539,14 @@ def mean_length_mrz(words):
         if(max_occur<mean_lengths.count(length)):
             max_occur=mean_lengths.count(length)
             mean_length = length
-        if(type(mean_length)==type(" ")):
+        if(isinstance(mean_length,str)):
             mean_length = 0
     return mean_length  
 
 def mean_word(words):
     mean_len = mean_length(words)
     final_word = ""
-    for i in range(0,mean_len):
+    for i in range(mean_len):
         chars={}        
         for word in words:
             if len(word) == mean_len:
@@ -570,7 +572,7 @@ def mean_word(words):
 def mean_mrz(words):
     mean_len = mean_length_mrz(words)
     final_word = ""
-    for i in range(0,mean_len):
+    for i in range(mean_len):
         chars={}        
         for word in words:
             if len(word) == mean_len:
