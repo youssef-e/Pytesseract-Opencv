@@ -1,6 +1,0 @@
-Python3.8
-Tesseract
-opencv-python
-pillow
-pytesseract
-re
