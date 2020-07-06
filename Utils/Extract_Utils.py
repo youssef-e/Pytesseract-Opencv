@@ -76,6 +76,7 @@ def clean_name(line):
     while(k<=len(words)-1):
         if(len(words[len(words)-k])>2):
             name=words[len(words)-k]
+            break
         k = k + 1
     return name
 
@@ -269,16 +270,24 @@ def mean_word(words):
     final_word = ""
     for i in range(mean_len):
         chars={}        
-        for word in words:
+        for j,word in enumerate(words):
             if len(word) == mean_len:
                 if word[i] in chars:
-                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
-                        chars[word[i]] =chars[word[i]] + 3
+                    if(len(words)>11 and (j == 12 or j == 14)):
+                        chars[word[i]] =chars[word[i]] + 4
+                    elif(len(words)>11 and j == 11 ):
+                        chars[word[i]] =chars[word[i]] + 2
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] =chars[word[i]] + 0.10
                     else:
                         chars[word[i]] =chars[word[i]] + 0.5
                 else:
-                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
-                        chars[word[i]] = 3
+                    if(len(words)>11 and (j==12 or j == 14)):
+                        chars[word[i]] = 4
+                    elif(len(words)>11 and j == 11 ):
+                        chars[word[i]] = 2
+                    elif(len(words)>10 and j <=9 ):
+                        chars[word[i]] = 0.10
                     else:
                         chars[word[i]] = 0.5
         max_val=-1
@@ -295,18 +304,23 @@ def mean_mrz(words):
     final_word = ""
     for i in range(mean_len):
         chars={}        
-        for word in words:
+        for j, word in enumerate(words):
             if len(word) == mean_len:
                 if word[i] in chars:
-                    if(len(words)>16 and (words[17]==word)):
+                    if(len(words)>19 and (j == 18)):
                         chars[word[i]] =chars[word[i]] + 3
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] =chars[word[i]] + 0.10
                     else:
-                        chars[word[i]] = chars[word[i]] + 1
+                        chars[word[i]] = chars[word[i]] + 0.5
                 else:
-                    if(len(words)>16 and (words[17]==word)):
+                    if(len(words)>19 and (j == 18)):
                         chars[word[i]] = 3
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] = 0.10
                     else:
-                        chars[word[i]] = 1
+                        chars[word[i]] = 0.5
+        print(chars)
         max_val=-1
         key=""
         for c in chars:
