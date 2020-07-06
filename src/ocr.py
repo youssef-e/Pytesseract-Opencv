@@ -1,9 +1,7 @@
 # import the necessary packages
-import unicodedata
 import argparse
 import os
 import sys
-import time
 import json
 
 
@@ -91,6 +89,7 @@ else:
 if delete :
     os.remove(input_file)
 
+input("Press Enter to continue...")
 #3,5
 # show the output images
 #cv2.imshow("Input", img)

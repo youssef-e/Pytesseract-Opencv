@@ -2,7 +2,6 @@ from PIL import Image, ImageChops
 import pytesseract
 import cv2
 import os
-import sys
 import numpy as np
 import re
 import math
@@ -41,11 +40,10 @@ def read_and_trim(input_file):
 
 # Rescale the image, if needed.
 def rescaling(image, imagename, output):
-    im_pil=img_pil = Image.fromarray(image)
+    img_pil = Image.fromarray(image)
     imagepaths=imagename.split("/")
     imagenames=imagepaths[len(imagepaths)-1].split(".")
-
-    imagename=output+"/"+imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]  
+    imagename=output+"/"+imagenames[len(imagenames)-2]+"600dpi."+imagenames[len(imagenames)-1]
     print(imagename)
     img_pil = img_pil.save(imagename, dpi=(600, 600))
     image = cv2.imread(imagename)
@@ -165,7 +163,7 @@ def deskew(image):
         #convert the pil image to cv2 image
         image = np.asarray(img_pil)
     except TypeError:
-        print("image too small to deskew")    
+        print("image too small to deskew")
     #this bit detect if the image is upside down or at 90 or 270 degree
     #then rotate it
     try:
@@ -189,12 +187,12 @@ def deskew(image):
         #convert the pil image to cv2 image
         image = np.asarray(img_pil)
     return image
-	
+
 #clean the text from empty lines
 def clean_result(text,char):
 	lines=text.split(char)
 	return [line for line in lines if line.strip() != ""]
-    
+
 def get_Strings(image, gray):
     names = []
     fnames = []

@@ -59,7 +59,7 @@ def fields_extract(extracted_lines):
     "mrz1" : mrz1,
     "mrz2" : mrz2
     }
-            
+
     for i,(k,v) in enumerate(result.items()):
         result[k]="-1" if v == "" else result[k]
     return result
@@ -76,6 +76,7 @@ def clean_name(line):
     while(k<=len(words)-1):
         if(len(words[len(words)-k])>2):
             name=words[len(words)-k]
+            break
         k = k + 1
     return name
 
@@ -168,7 +169,7 @@ def birthday_extract(extracted_line):
     for value in words:
         if value !="":
             clean_line.append(value)
-    #it then can extract the date        
+    #it then can extract the date
     try:
         result = clean_line[len(clean_line)-3]+" "+clean_line[len(clean_line)-2]+" "+clean_line[len(clean_line)-1]
     except IndexError:
@@ -220,17 +221,15 @@ def mrz1_extract(extracted_line):
     return result
 
 def mrz2_extract(extracted_line):
-    mrz="-1"  
     line = extracted_line.upper()
-    word=clean_alphanum(line)
-    result=""
+    word = clean_alphanum(line)
+    result = ""
     if ("-1" not in word):
         #clean the unnecessary caracters from the extracted str
         result = clean_alphanum(word)
     else:
         result = "-1"
     return result
-            
 
 def mean_length(words):
     mean_lengths=[]
@@ -269,16 +268,24 @@ def mean_word(words):
     final_word = ""
     for i in range(mean_len):
         chars={}        
-        for word in words:
+        for j,word in enumerate(words):
             if len(word) == mean_len:
                 if word[i] in chars:
-                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
-                        chars[word[i]] =chars[word[i]] + 3
+                    if(len(words)>11 and (j == 12 or j == 14)):
+                        chars[word[i]] =chars[word[i]] + 4
+                    elif(len(words)>11 and j == 11 ):
+                        chars[word[i]] =chars[word[i]] + 2
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] =chars[word[i]] + 0.10
                     else:
                         chars[word[i]] =chars[word[i]] + 0.5
                 else:
-                    if(len(words)>11 and (words[11]==word or words[12]==word or words[14]==word)):
-                        chars[word[i]] = 3
+                    if(len(words)>11 and (j==12 or j == 14)):
+                        chars[word[i]] = 4
+                    elif(len(words)>11 and j == 11 ):
+                        chars[word[i]] = 2
+                    elif(len(words)>10 and j <=9 ):
+                        chars[word[i]] = 0.10
                     else:
                         chars[word[i]] = 0.5
         max_val=-1
@@ -295,18 +302,23 @@ def mean_mrz(words):
     final_word = ""
     for i in range(mean_len):
         chars={}        
-        for word in words:
+        for j, word in enumerate(words):
             if len(word) == mean_len:
                 if word[i] in chars:
-                    if(len(words)>16 and (words[17]==word)):
+                    if(len(words)>19 and (j == 18)):
                         chars[word[i]] =chars[word[i]] + 3
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] =chars[word[i]] + 0.10
                     else:
-                        chars[word[i]] = chars[word[i]] + 1
+                        chars[word[i]] = chars[word[i]] + 0.5
                 else:
-                    if(len(words)>16 and (words[17]==word)):
+                    if(len(words)>19 and (j == 18)):
                         chars[word[i]] = 3
+                    elif(len(words)>10 and j<=9):
+                        chars[word[i]] = 0.10
                     else:
-                        chars[word[i]] = 1
+                        chars[word[i]] = 0.5
+        print(chars)
         max_val=-1
         key=""
         for c in chars:
@@ -319,5 +331,5 @@ def mean_mrz(words):
             elif chars[c]>=max_val:
                 max_val=chars[c]
                 key = c
-        final_word = final_word + key 
+        final_word = final_word + key
     return final_word
