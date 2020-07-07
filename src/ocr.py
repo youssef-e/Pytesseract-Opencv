@@ -26,13 +26,43 @@ from Image_Process_Utils import(
     remove_noise,
     apply_threshold,
     deskew,
-    get_Strings
+    get_Strings,
+    pre_process
     )
+
+
 #~~~~~~~~~~~~~~ Main function ~~~~~~~~~~~~~~~~~#
 #variable declaration
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 
-
+#id fields score
+scores1={
+          12 : 4,
+          14 : 4,
+          11 : 2,
+          9 : 0.1, 
+          8 : 0.1,
+          7 : 0.1,
+          6 : 0.1,
+          5 : 0.1,
+          4 : 0.1,
+          3 : 0.1,
+          2 : 0.1
+    }
+#mrz scores 
+scores2={
+          12 : 4,
+          18 : 4,
+          9 : 0.1, 
+          8 : 0.1,
+          7 : 0.1,
+          6 : 0.1,
+          5 : 0.1,
+          4 : 0.1,
+          3 : 0.1,
+          2 : 0.1,
+          0 : 1 
+    }
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
 ap.add_argument(
@@ -69,13 +99,9 @@ if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
     input_file = detection_results_folder+"/pdfToimage.png"
     delete = True
 #read and trim the image from white borders
-img = read_and_trim(input_file)
-
-img = rescaling(img,input_file,detection_results_folder)
-img = deskew(img) 
-gray = get_grayscale(img)
-img = remove_noise(gray)
-result = get_Strings(img, gray)
+img = read_and_trim(input_file)#1
+(img,gray) = pre_process(img, input_file)
+result = get_Strings(img, gray, scores1,scores2)
 if save_result:
     detection_results_file = os.path.join(result_folder, "Detection_Results.json")
     with open(detection_results_file, 'w') as f:

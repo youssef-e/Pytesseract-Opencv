@@ -30,14 +30,16 @@ def fields_extract(extracted_lines):
             
         elif (("ationale" in line.lower()) or ("carte" in line.lower()) or (" identite" in line.lower())):
             id_nbr =id_extract(line) if not is_found(name) else name
+            nationality = nationality_extract(line) if not is_found(nationality) else nationality
             try:
                 line=extracted_lines[i+1]
             except IndexError:
                 name ="-1"
             else:
                 name = clean_name(line) if not is_found(name) else name
-        elif ("Natio" in line or "alite" in line or " ation" in line or "onatite" in line):
+        elif ("Natio" in line) or ("alite" in line) or ("ation" in line) or ("onatite" in line):
             nationality = nationality_extract(line) if not is_found(nationality) else nationality
+            print("nationality: "+nationality)
         else:
             line=clean_alphanum(line).upper()
             if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
@@ -78,6 +80,9 @@ def clean_name(line):
             name=words[len(words)-k]
             break
         k = k + 1
+    if (name== "Nom" or name == "Mom" or name == "nom" or name == "Non" or name == "non"):
+        name="-1"
+
     return name
 
 def is_found(string):
@@ -235,9 +240,14 @@ def mean_length(words):
     mean_lengths=[]
     max_occur=0
     mean_length=0
-    for word in words:
-        if word != "-1":
+    for i,word in enumerate(words):
+        if word != "-1" and (i<1 or i>9):
             mean_lengths.append(len(word))
+    if len(mean_lengths)<=1:
+        mean_lengths=[]
+        for i,word in enumerate(words):
+            if word != "-1":
+                mean_lengths.append(len(word))
     for length in mean_lengths:
         if(max_occur<mean_lengths.count(length)):
             max_occur=mean_lengths.count(length)
@@ -263,31 +273,29 @@ def mean_length_mrz(words):
             mean_length = 0
     return mean_length  
 
-def mean_word(words):
+def score(i,mean_len,words, scores):
+    chars={}        
+    for j,word in enumerate(words):
+        if len(word) == mean_len:
+                if j in scores:
+                    if word[i] in chars:
+                        chars[word[i]] += scores[j]
+                    else:
+                        chars[word[i]] = scores[j]
+
+                else:
+                    if word[i] in chars:
+                        chars[word[i]] += 0.5
+                    else:
+                        chars[word[i]] = 0.5
+    return chars
+
+def mean_word(words, scores):
     mean_len = mean_length(words)
     final_word = ""
     for i in range(mean_len):
-        chars={}        
-        for j,word in enumerate(words):
-            if len(word) == mean_len:
-                if word[i] in chars:
-                    if(len(words)>11 and (j == 12 or j == 14)):
-                        chars[word[i]] =chars[word[i]] + 4
-                    elif(len(words)>11 and j == 11 ):
-                        chars[word[i]] =chars[word[i]] + 2
-                    elif(len(words)>10 and j<=9):
-                        chars[word[i]] =chars[word[i]] + 0.10
-                    else:
-                        chars[word[i]] =chars[word[i]] + 0.5
-                else:
-                    if(len(words)>11 and (j==12 or j == 14)):
-                        chars[word[i]] = 4
-                    elif(len(words)>11 and j == 11 ):
-                        chars[word[i]] = 2
-                    elif(len(words)>10 and j <=9 ):
-                        chars[word[i]] = 0.10
-                    else:
-                        chars[word[i]] = 0.5
+        chars=score(i,mean_len,words,scores)
+        #print(chars)
         max_val=-1
         key=""
         for c in chars:
@@ -297,32 +305,16 @@ def mean_word(words):
         final_word = final_word + key 
     return final_word
 
-def mean_mrz(words):
+def mean_mrz(words,scores):
     mean_len = mean_length_mrz(words)
     final_word = ""
     for i in range(mean_len):
-        chars={}        
-        for j, word in enumerate(words):
-            if len(word) == mean_len:
-                if word[i] in chars:
-                    if(len(words)>19 and (j == 18)):
-                        chars[word[i]] =chars[word[i]] + 3
-                    elif(len(words)>10 and j<=9):
-                        chars[word[i]] =chars[word[i]] + 0.10
-                    else:
-                        chars[word[i]] = chars[word[i]] + 0.5
-                else:
-                    if(len(words)>19 and (j == 18)):
-                        chars[word[i]] = 3
-                    elif(len(words)>10 and j<=9):
-                        chars[word[i]] = 0.10
-                    else:
-                        chars[word[i]] = 0.5
+        chars=score(i,mean_len,words,scores)
         print(chars)
         max_val=-1
         key=""
         for c in chars:
-            if c == "<" or c=="(" or c == "[" or c == "{":
+            if ((c == "<" or c=="(" or c == "[" or c == "{") and chars[c]>0.5):
                 key = "<"
                 break
             elif ((c == "S" or c == "C") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<")):
