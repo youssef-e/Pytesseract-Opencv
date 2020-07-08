@@ -24,10 +24,7 @@ def pdf_convertion(input_file, output):
     pix.writePNG(input_file)
 
 def trim(im):
-    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
-    diff = ImageChops.difference(im, bg)
-    diff = ImageChops.add(diff, diff, 2.0, -100)
-    bbox = diff.getbbox()
+    bbox = get_box(im)
     if bbox:
         return im.crop(bbox)
     return im
@@ -79,15 +76,15 @@ def remove_noise(image):
 def apply_threshold(img,gray, argument):
     kernel = np.ones((1,1), np.uint8)
     switcher = {
-        1: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (5, 5), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        2: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        3: cv2.erode(cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
-        4: cv2.threshold(cv2.GaussianBlur(img, (3, 3), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        5: cv2.threshold(cv2.GaussianBlur(img, (1, 1), 0), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        6: cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        7: cv2.threshold(cv2.medianBlur(img, 5), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        8: cv2.threshold(cv2.medianBlur(img, 3), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
-        9: cv2.threshold(cv2.medianBlur(img, 1), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        1: gray,
+        2: cv2.erode(cv2.threshold(cv2.GaussianBlur(gray, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        3: cv2.erode(cv2.threshold(cv2.GaussianBlur(gray, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],kernel,iterations=1),
+        4: cv2.threshold(cv2.GaussianBlur(gray, (3, 3), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        5: cv2.threshold(cv2.GaussianBlur(gray, (1, 1), 0), 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        6: cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        7: cv2.threshold(cv2.medianBlur(gray, 5), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        8: cv2.threshold(cv2.medianBlur(gray, 3), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
+        9: cv2.threshold(cv2.medianBlur(gray, 1), 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         10: cv2.adaptiveThreshold(cv2.bilateralFilter(img,9,40,100), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
         11: cv2.threshold(cv2.bilateralFilter(img,3,75,75),127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1],
         12: img,
@@ -188,12 +185,35 @@ def deskew(image):
         image = np.asarray(img_pil)
     return image
 
+def get_box(im):
+    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    return bbox
+
+def pre_process(image, input_file):
+    img = rescaling(image,input_file,"./")
+    img = deskew(img)
+    gray = get_grayscale(img)
+    img = remove_noise(gray)
+    img_thresh = apply_threshold(img,gray,19)
+    img_thresh = Image.fromarray(img_thresh)
+    box = get_box(img_thresh)
+    img_p = Image.fromarray(img)
+    img_p = img_p.crop(box)#2
+    img = np.asarray(img_p)
+    img = rescaling(img,input_file,"./")
+    img = get_grayscale(img)
+    img = remove_noise(img)
+    return  (img, gray)
+
 #clean the text from empty lines
 def clean_result(text,char):
 	lines=text.split(char)
 	return [line for line in lines if line.strip() != ""]
 
-def get_Strings(image, gray):
+def get_Strings(image, gray, scores1,scores2):
     names = []
     fnames = []
     id_nbrs = []
@@ -255,14 +275,14 @@ def get_Strings(image, gray):
         print(str(i)+": "+mrz2+" len: "+str(len(mrz2)))
     
     x = {
-    "Name" : mean_word(names),
-    "First_name" : mean_word(fnames),
-    "Id_number" : mean_word(id_nbrs),
-    "Nationality" : mean_word(nationalities),
-    "Gender" : mean_word(genders),
-    "Birthday" : mean_word(birthdays),
-    "MRZ_l1" : mean_mrz(mrz1s),
-    "MRZ_l2" : mean_mrz(mrz2s)
+    "Name" : mean_word(names,scores1),
+    "First_name" : mean_word(fnames,scores1),
+    "Id_number" : mean_word(id_nbrs,scores1),
+    "Nationality" : mean_word(nationalities,scores1),
+    "Gender" : mean_word(genders,scores1),
+    "Birthday" : mean_word(birthdays,scores1),
+    "MRZ_l1" : mean_mrz(mrz1s,scores2),
+    "MRZ_l2" : mean_mrz(mrz2s,scores2)
     }
     y=json.dumps(x,sort_keys=True,indent=4)
     print(y)
