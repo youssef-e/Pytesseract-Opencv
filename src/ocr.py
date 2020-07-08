@@ -40,7 +40,7 @@ scores1={
           12 : 4,
           14 : 4,
           11 : 2,
-          9 : 0.1, 
+          9 : 0.1,
           8 : 0.1,
           7 : 0.1,
           6 : 0.1,
@@ -53,7 +53,7 @@ scores1={
 scores2={
           12 : 4,
           18 : 4,
-          9 : 0.1, 
+          9 : 0.1,
           8 : 0.1,
           7 : 0.1,
           6 : 0.1,
@@ -61,7 +61,7 @@ scores2={
           4 : 0.1,
           3 : 0.1,
           2 : 0.1,
-          0 : 1 
+          0 : 1
     }
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()

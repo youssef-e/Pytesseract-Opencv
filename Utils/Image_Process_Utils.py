@@ -24,10 +24,7 @@ def pdf_convertion(input_file, output):
     pix.writePNG(input_file)
 
 def trim(im):
-    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
-    diff = ImageChops.difference(im, bg)
-    diff = ImageChops.add(diff, diff, 2.0, -100)
-    bbox = diff.getbbox()
+    bbox = get_box(im)
     if bbox:
         return im.crop(bbox)
     return im
@@ -197,7 +194,7 @@ def get_box(im):
 
 def pre_process(image, input_file):
     img = rescaling(image,input_file,"./")
-    img = deskew(img) 
+    img = deskew(img)
     gray = get_grayscale(img)
     img = remove_noise(gray)
     img_thresh = apply_threshold(img,gray,19)

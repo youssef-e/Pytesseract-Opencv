@@ -13,7 +13,7 @@ def fields_extract(extracted_lines):
     mrz2 = "-1"
     for i, extracted_line in enumerate(extracted_lines):
         line = extracted_line
-        if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line)):
+        if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line) or ("Now" in line)):
             name=clean_name(line) if not is_found(name) else name
       
         elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
