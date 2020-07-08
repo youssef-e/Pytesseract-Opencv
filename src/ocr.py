@@ -49,7 +49,7 @@ scores1={
           3 : 0.1,
           2 : 0.1
     }
-#mrz scores 
+#mrz scores
 scores2={
           12 : 4,
           18 : 4,
