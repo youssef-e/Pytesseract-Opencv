@@ -27,7 +27,7 @@ class Name(Fields):
 		result = ""
 		for i in range(25):
 			if i > len(self):
-				result +"<"
+				result +="<"
 			elif c =="'" or c == " ":
 				result += "<"
 			else:

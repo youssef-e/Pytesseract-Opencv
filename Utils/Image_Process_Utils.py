@@ -62,7 +62,7 @@ def remove_noise(image):
     # Apply blur to smooth out the edges
     img = cv2.GaussianBlur(img, (5, 5), 0)
     return img
- 
+
 #thresholding with different filters
 def apply_threshold(img,gray, argument):
     kernel = np.ones((1,1), np.uint8)
@@ -92,7 +92,7 @@ def apply_threshold(img,gray, argument):
     }
     return switcher.get(argument, "Invalid method")
 
-#deskew 
+#deskew
 def deskew(image):
    
     # convert the image to grayscale and flip the foreground

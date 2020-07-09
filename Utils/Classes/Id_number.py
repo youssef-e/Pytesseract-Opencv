@@ -15,7 +15,7 @@ class Id_number(Fields):
 					if notFound :
 						if(c>='0' and c<='9'):
 							id_nbr=value
-							notFound = False                   
+							notFound = False
 							break
 						else:
 							break

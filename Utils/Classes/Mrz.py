@@ -19,7 +19,7 @@ class Mrz(Fields):
 				mean_length = length
 		if(isinstance(mean_length,str)):
 			mean_length = 0
-		return mean_length  
+		return mean_length
 
 	def mean_word(words, scores):
 		mean_len = Mrz.mean_length(words)

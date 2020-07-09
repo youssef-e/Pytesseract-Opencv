@@ -28,7 +28,7 @@ class Birthday(Fields):
 					result=result.replace(c,"")
 			if len(result)!= 10:
 				result ="-1"
-		#however if the image is too small, they may not be any lines below the firstname, it then sends an error	   
+		#however if the image is too small, they may not be any lines below the firstname, it then sends an error
 		return self.set_field(result)
 
 	def word_to_mrz (self):

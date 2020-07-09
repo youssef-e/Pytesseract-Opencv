@@ -85,6 +85,3 @@ class Fields:
 
 	def word_to_mrz(self):
 		return self.field
-
-	def test(line):
-		print("Fields :"+ line)

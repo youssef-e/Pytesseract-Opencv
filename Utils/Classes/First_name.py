@@ -54,7 +54,7 @@ class First_name(Fields):
 		result = ""
 		for i in range(14):
 			if i > len(self):
-				result +"<"
+				result +="<"
 			elif c =="-":
 				result += "<"
 			elif c == " ":

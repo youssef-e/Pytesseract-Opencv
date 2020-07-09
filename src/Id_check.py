@@ -116,4 +116,3 @@ print(data_integrity_check(data))
 print(get_key(data['Id_number']))
 print(birthday_to_MRZ(data['Birthday']))
 print(get_key(birthday_to_MRZ(data['Birthday'])))
-

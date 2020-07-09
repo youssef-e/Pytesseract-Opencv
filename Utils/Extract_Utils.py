@@ -51,7 +51,7 @@ def fields_extract(extracted_lines):
 		else:
 			line=Fields.clean_alphanum(line).upper()
 			if("<<" in line and ("IDFRA" in line or "IOFRA" in line or "DFRA" in line or "OFRA" in line)):
-				if not is_found(mrz1):	
+				if not is_found(mrz1):
 					mrz1.extract(line)
 				try:
 					line=extracted_lines[i+1]
@@ -59,7 +59,7 @@ def fields_extract(extracted_lines):
 					mrz2.set_field("-1")
 					print("mrz2 not found")
 				else:
-					if not is_found(mrz2):	
+					if not is_found(mrz2):
 						mrz2.extract(line)
 	result = {
 	"name" : str(name),
@@ -75,11 +75,7 @@ def fields_extract(extracted_lines):
 		result[k]="-1" if v == "" else result[k]
 	return result
 
-
-
-
 def is_found(string):
 	if("-1" in string):
 		return False
 	return True
-
