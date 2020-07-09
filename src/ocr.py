@@ -16,10 +16,12 @@ def get_parent_dir(n=1):
 utils_path = os.path.join(get_parent_dir(1), "Utils")
 sys.path.append(utils_path)
 
-
+from Utils import (
+    pdf_convertion,
+  )
 
 from Image_Process_Utils import(
-    pdf_convertion,
+
     read_and_trim,
     rescaling,
     get_grayscale,
@@ -53,7 +55,7 @@ scores1={
 scores2={
           12 : 4,
           18 : 4,
-          9 : 0.1,
+          19 : 1,
           8 : 0.1,
           7 : 0.1,
           6 : 0.1,
@@ -61,7 +63,6 @@ scores2={
           4 : 0.1,
           3 : 0.1,
           2 : 0.1,
-          0 : 1
     }
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -99,7 +100,7 @@ if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
     input_file = detection_results_folder+"/pdfToimage.png"
     delete = True
 #read and trim the image from white borders
-img = read_and_trim(input_file)#1
+img = read_and_trim(input_file)
 (img,gray) = pre_process(img, input_file)
 result = get_Strings(img, gray, scores1,scores2)
 if save_result:

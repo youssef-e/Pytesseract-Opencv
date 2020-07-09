@@ -10,18 +10,9 @@ import json
 import unicodedata
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
 
-from Extract_Utils import(
-	fields_extract,
-	mean_word,
-	mean_mrz
-    )
-
-def pdf_convertion(input_file, output):
-    doc = fitz.open(input_file)
-    page = doc.loadPage(0) #number of page
-    pix = page.getPixmap()
-    input_file = output
-    pix.writePNG(input_file)
+from Extract_Utils import fields_extract
+from Classes.Fields import Fields
+from Classes.Mrz import Mrz
 
 def trim(im):
     bbox = get_box(im)
@@ -92,7 +83,7 @@ def apply_threshold(img,gray, argument):
         14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
         15: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,8,75,75), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 2),
         16: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2),
-        17: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,3,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
+        17: cv2.adaptiveThreshold(cv2.bilateralFilter(img,9,150,150), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2),
         18: cv2.adaptiveThreshold(cv2.bilateralFilter(img,8,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
         19: cv2.adaptiveThreshold(cv2.GaussianBlur(img, (5, 5), 0), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2),
         20: cv2.adaptiveThreshold(cv2.medianBlur(img, 3), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2),
@@ -173,10 +164,16 @@ def deskew(image):
     else:
         print("[OSD] "+rot_data)
         rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
+        conf = re.search('(?<=Orientation confidence: )\d+', rot_data).group(0)
         #calculation of the correction angle
-        angle = float(rot)
+        if float(conf) > 0.7:
+            angle = float(rot)
+        else:
+            angle = 0
+
         if angle > 0:
             angle = 360 - angle
+
         print("[ANGLE 3] "+str(angle))
         # rotate the image to deskew it
         img_pil = Image.fromarray(image)
@@ -217,7 +214,6 @@ def get_Strings(image, gray, scores1,scores2):
     names = []
     fnames = []
     id_nbrs = []
-    nationalities = []
     genders = []
     birthdays= []
     mrz1s=[]
@@ -238,7 +234,6 @@ def get_Strings(image, gray, scores1,scores2):
         names.append(idcard["name"])
         fnames.append(idcard["fname"])
         id_nbrs.append(idcard["id_nbr"])
-        nationalities.append(idcard["nationality"])
         genders.append(idcard["gender"])
         birthdays.append(idcard["birthday"])
         mrz1s.append(idcard["mrz1"])
@@ -258,9 +253,6 @@ def get_Strings(image, gray, scores1,scores2):
     print("~~~~~~~~ id nbrs ~~~~~~~")
     for i, id_nbr in enumerate(id_nbrs,1):
         print(str(i)+": "+id_nbr+" len: "+ str(len(id_nbr)))
-    print("~~~~~~~~ nationality ~~~~~~~")
-    for i, nationality in enumerate(nationalities,1):
-        print(str(i)+": "+nationality+" len: "+str(len(nationality)))
     print("~~~~~~~~ gender ~~~~~~~")
     for i, gender in enumerate(genders,1):
         print(str(i)+": "+gender+" len: "+str(len(genders)))
@@ -275,14 +267,13 @@ def get_Strings(image, gray, scores1,scores2):
         print(str(i)+": "+mrz2+" len: "+str(len(mrz2)))
     
     x = {
-    "Name" : mean_word(names,scores1),
-    "First_name" : mean_word(fnames,scores1),
-    "Id_number" : mean_word(id_nbrs,scores1),
-    "Nationality" : mean_word(nationalities,scores1),
-    "Gender" : mean_word(genders,scores1),
-    "Birthday" : mean_word(birthdays,scores1),
-    "MRZ_l1" : mean_mrz(mrz1s,scores2),
-    "MRZ_l2" : mean_mrz(mrz2s,scores2)
+    "Name" : Fields.mean_word(names,scores1),
+    "First_name" : Fields.mean_word(fnames,scores1),
+    "Id_number" : Fields.mean_word(id_nbrs,scores1),
+    "Gender" : Fields.mean_word(genders,scores1),
+    "Birthday" : Fields.mean_word(birthdays,scores1),
+    "MRZ_l1" : Mrz.mean_word(mrz1s,scores2),
+    "MRZ_l2" : Mrz.mean_word(mrz2s,scores2)
     }
     y=json.dumps(x,sort_keys=True,indent=4)
     print(y)
