@@ -1,9 +1,6 @@
 from Classes.Fields import Fields
 
 class Gender(Fields):
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
-
 	#look for the id in the extracted lines using key words to locate it; it returns a str
 	def extract(self, line):
 		gender = "-1"

@@ -77,16 +77,6 @@ def data_integrity_check(data):
             return False
     return True
 
-def birthday_to_MRZ (birthday):
-    date = birthday.split(" ")
-    return date[2][2:]+date[1]+date[0]
-
-
-def name_to_mrZ(name):
-    result = ""
-    for c in name:
-        if()
-
 
 
 
@@ -113,6 +103,6 @@ with open(detection_results_file) as json_file:
 print(str(data) + " len: "+ str(len(data)))
 print("data integrity check:")
 print(data_integrity_check(data))
-print(get_key(data['Id_number']))
-print(birthday_to_MRZ(data['Birthday']))
-print(get_key(birthday_to_MRZ(data['Birthday'])))
+# print(get_key(data['Id_number']))
+# print(birthday_to_MRZ(data['Birthday']))
+# print(get_key(birthday_to_MRZ(data['Birthday'])))

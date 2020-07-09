@@ -2,9 +2,6 @@ from Classes.Fields import Fields
 
 class First_name(Fields):
 
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
-
 	def extract(self , line):
 		name="-1"
 		if ("Pren" in line or "preno" in line or "Prenom" in line or "Pre" in line):
@@ -55,10 +52,10 @@ class First_name(Fields):
 		for i in range(14):
 			if i > len(self):
 				result +="<"
-			elif c =="-":
+			elif self[i] =="-":
 				result += "<"
-			elif c == " ":
-				reslut+="<<"
+			elif self[i] == " ":
+				result+="<<"
 			else:
-				result += c
+				result += self[i]
 		return result[:14].upper()

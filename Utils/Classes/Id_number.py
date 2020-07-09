@@ -1,8 +1,6 @@
 from Classes.Fields import Fields
 
 class Id_number(Fields):
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
 
 	#look for the id in the extracted lines using key words to locate it; it returns a str
 	def extract(self, line):

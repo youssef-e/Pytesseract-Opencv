@@ -1,6 +1,5 @@
 import fitz
-import os
-import sys
+
 
 
 

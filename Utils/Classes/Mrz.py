@@ -1,8 +1,6 @@
 from Classes.Fields import Fields
 
 class Mrz(Fields):
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
 
 	def mean_length(words):
 		mean_lengths=[]

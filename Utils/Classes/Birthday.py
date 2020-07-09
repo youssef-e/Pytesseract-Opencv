@@ -2,10 +2,6 @@ from Classes.Fields import Fields
 
 class Birthday(Fields):
 
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
-
-
 	def extract(self, line):
 		result="-1"
 		#since the line containing the birthday tend to not be read correctly
@@ -32,5 +28,5 @@ class Birthday(Fields):
 		return self.set_field(result)
 
 	def word_to_mrz (self):
-		date = birthday.split(" ")
+		date = self.split(" ")
 		return date[2][2:]+date[1]+date[0]

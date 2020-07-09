@@ -1,6 +1,7 @@
 
 class Fields:
 	def __init__(self, line = ""):
+		"""Create a Fields objetc that contain a single string when the object is created"""
 		self.field = line
 
 	def __str__(self):
@@ -52,7 +53,7 @@ class Fields:
 		return mean_length
 
 	def score(i,mean_len,words, scores):
-		chars={}		
+		chars={}
 		for j,word in enumerate(words):
 			if len(word) == mean_len:
 					if j in scores:

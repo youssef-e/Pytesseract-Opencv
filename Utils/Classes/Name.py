@@ -2,9 +2,6 @@ from Classes.Fields import Fields
 
 class Name(Fields):
 
-	def __init__(self, line = ""):
-		Fields.__init__(self, line)
-
 	def extract(self , line):
 		name ="-1"
 		cleanedLine=line
@@ -28,8 +25,8 @@ class Name(Fields):
 		for i in range(25):
 			if i > len(self):
 				result +="<"
-			elif c =="'" or c == " ":
+			elif self[i] =="'" or self[i] == " ":
 				result += "<"
 			else:
-				result += c
+				result += self[i]
 		return result.upper()

@@ -3,10 +3,6 @@ from Classes.Fields import Fields
 
 class Mrz1(Mrz):
 
-	def __init__(self, line = ""):
-		Mrz.__init__(self, line)
-
-
 	def extract(self, line):
 		mrz="-1"
 		line = line.upper()

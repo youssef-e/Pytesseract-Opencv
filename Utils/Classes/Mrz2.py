@@ -3,10 +3,6 @@ from Classes.Fields import Fields
 
 class Mrz2(Mrz):
 
-	def __init__(self, line = ""):
-		Mrz.__init__(self, line)
-
-
 	def extract(self, line):
 		line = line.upper()
 		word = Fields.clean_alphanum(line)

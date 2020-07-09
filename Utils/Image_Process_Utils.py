@@ -5,7 +5,6 @@ import os
 import numpy as np
 import re
 import math
-import fitz
 import json
 import unicodedata
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
