@@ -65,8 +65,8 @@ def data_integrity_check(data):
 				return False
 	return True
 
-def compare_fields_to_mrz(data):
-    
+#def compare_fields_to_mrz(data):
+
 
 def from_string_to_fields(data):
 	dispatcher={'Name':Name,

@@ -87,13 +87,10 @@ def apply_threshold(img,gray, argument):
 
 #deskew
 def deskew(image):
-   
     # convert the image to grayscale and flip the foreground
     # and background to ensure foreground is now "white" and
     # the background is "black"
-    
     #This second bit detect smaller inclination angle and correct it
-
     # convert the image to grayscale and flip the foreground
     # and background to ensure foreground is now "white" and
     # the background is "black"
@@ -197,6 +194,3 @@ def pre_process(image, input_file):
     img = get_grayscale(img)
     img = remove_noise(img)
     return  (img, gray)
-
-
-

@@ -27,7 +27,6 @@ def fields_extract(extracted_lines):
 		if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line) or ("Now" in line)):
 			if not is_found(name):
 				name.extract(line)
-	  
 		elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
 			if not is_found(fname):
 				fname.extract(line)
@@ -41,7 +40,6 @@ def fields_extract(extracted_lines):
 					birthday.extract(line)
 				if not is_found(gender):
 					gender.extract(line)
-			
 		elif (("ationale" in line.lower()) or ("carte" in line.lower()) or (" identite" in line.lower())):
 			if not is_found(name):
 				id_nbr.extract(line)
