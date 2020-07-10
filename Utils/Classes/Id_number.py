@@ -18,3 +18,9 @@ class Id_number(Fields):
 						else:
 							break
 		return self.set_field(id_nbr)
+
+	def synthax_check(self):
+		if len(self) != 12 or self.field == "-1":
+			print("Warning: Incorrect data")
+			return False
+		return True

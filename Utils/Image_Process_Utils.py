@@ -1,17 +1,11 @@
 from PIL import Image, ImageChops
-import pytesseract
 import cv2
 import os
 import numpy as np
 import re
 import math
-import json
-import unicodedata
+import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
-
-from Extract_Utils import fields_extract
-from Classes.Fields import Fields
-from Classes.Mrz import Mrz
 
 def trim(im):
     bbox = get_box(im)
@@ -204,76 +198,5 @@ def pre_process(image, input_file):
     img = remove_noise(img)
     return  (img, gray)
 
-#clean the text from empty lines
-def clean_result(text,char):
-	lines=text.split(char)
-	return [line for line in lines if line.strip() != ""]
 
-def get_Strings(image, gray, scores1,scores2):
-    names = []
-    fnames = []
-    id_nbrs = []
-    genders = []
-    birthdays= []
-    mrz1s=[]
-    mrz2s=[]
-    for i in range(1,21):
-        thresh = apply_threshold(image,gray,i)
-        result = pytesseract.image_to_string(thresh, lang='fra')
-        result= unicodedata.normalize("NFKD",result).encode('ascii', 'ignore').decode('ascii')
-        print('#=======================================================')
-        print("#=================== filter "+str(i)+" ===================")
-        print('#=======================================================')
-        #print(result)
-        lines= clean_result(result, '\n')
-        for line in lines:
-            print(line)
-            print("~~~~~~")
-        idcard = fields_extract(lines)
-        names.append(idcard["name"])
-        fnames.append(idcard["fname"])
-        id_nbrs.append(idcard["id_nbr"])
-        genders.append(idcard["gender"])
-        birthdays.append(idcard["birthday"])
-        mrz1s.append(idcard["mrz1"])
-        mrz2s.append(idcard["mrz2"])
-        cv2.imshow('img'+str(i), thresh)
-    
-    #result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
-    print('#=======================================================')
-    print('#==================== extracted data ===================')
-    print('#=======================================================')
-    print("~~~~~~~~ names ~~~~~~~")
-    for i, name in enumerate(names,1):
-        print(str(i)+": "+name+" len: "+ str(len(name)))
-    print("~~~~~~~~ fnames ~~~~~~~")
-    for i, fname in enumerate(fnames,1):
-        print(str(i)+": "+fname+" len: "+ str(len(fname)))
-    print("~~~~~~~~ id nbrs ~~~~~~~")
-    for i, id_nbr in enumerate(id_nbrs,1):
-        print(str(i)+": "+id_nbr+" len: "+ str(len(id_nbr)))
-    print("~~~~~~~~ gender ~~~~~~~")
-    for i, gender in enumerate(genders,1):
-        print(str(i)+": "+gender+" len: "+str(len(genders)))
-    print("~~~~~~~~ birthday ~~~~~~~")
-    for i, birthday in enumerate(birthdays,1):
-        print(str(i)+": "+birthday+" len: "+str(len(birthday)))
-    print("~~~~~~~~ mrz 1 ~~~~~~~")
-    for i, mrz1 in enumerate(mrz1s,1):
-        print(str(i)+": "+mrz1+" len: "+str(len(mrz1)))
-    print("~~~~~~~~ mrz 2 ~~~~~~~")
-    for i, mrz2 in enumerate(mrz2s,1):
-        print(str(i)+": "+mrz2+" len: "+str(len(mrz2)))
-    
-    x = {
-    "Name" : Fields.mean_word(names,scores1),
-    "First_name" : Fields.mean_word(fnames,scores1),
-    "Id_number" : Fields.mean_word(id_nbrs,scores1),
-    "Gender" : Fields.mean_word(genders,scores1),
-    "Birthday" : Fields.mean_word(birthdays,scores1),
-    "MRZ_l1" : Mrz.mean_word(mrz1s,scores2),
-    "MRZ_l2" : Mrz.mean_word(mrz2s,scores2)
-    }
-    y=json.dumps(x,sort_keys=True,indent=4)
-    print(y)
-    return x
+

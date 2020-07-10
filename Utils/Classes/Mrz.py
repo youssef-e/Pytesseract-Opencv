@@ -7,7 +7,7 @@ class Mrz(Fields):
 		max_occur=0
 		mean_length=0
 		for word in words:
-			if word != "-1":
+			if str(word) != "-1":
 				mean_lengths.append(len(word))
 		for length in mean_lengths:
 			if(length == 36):
@@ -19,7 +19,14 @@ class Mrz(Fields):
 			mean_length = 0
 		return mean_length
 
-	def mean_word(words, scores):
+
+	def synthax_check(self):
+		if len(self) != 36 or self.field == "-1":
+			print("Warning: Incorrect data")
+			return False
+		return True
+
+	def mean_word( words, scores):
 		mean_len = Mrz.mean_length(words)
 		final_word = ""
 		for i in range(mean_len):

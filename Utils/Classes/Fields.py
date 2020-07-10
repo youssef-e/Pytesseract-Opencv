@@ -32,17 +32,23 @@ class Fields:
 		result = result + word
 		return result
 
+	def synthax_check(self):
+		if len(self) < 2 or self.field == "-1":
+			print("Warning: Incorrect data")
+			return False
+		return True
+
 	def mean_length(words):
 		mean_lengths=[]
 		max_occur=0
 		mean_length=0
 		for i,word in enumerate(words):
-			if word != "-1" and (i<1 or i>9):
+			if str(word) != "-1" and (i<1 or i>9):
 				mean_lengths.append(len(word))
 		if len(mean_lengths) <= 1:
 			mean_lengths = []
 			for i,word in enumerate(words):
-				if word != "-1":
+				if str(word) != "-1":
 					mean_lengths.append(len(word))
 		for length in mean_lengths:
 			if(max_occur < mean_lengths.count(length)):
@@ -74,7 +80,7 @@ class Fields:
 		final_word = ""
 		for i in range(mean_len):
 			chars=Fields.score(i,mean_len,words,scores)
-			#print(chars)
+			print(chars)
 			max_val=-1
 			key=""
 			for c in chars:

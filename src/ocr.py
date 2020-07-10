@@ -6,8 +6,8 @@ import json
 
 
 def get_parent_dir(n=1):
-    """ returns the n-th parent dicrectory of the current working directory """
-    
+    """ returns the n-th parent dicrectory of the current working directory."""
+
     current_path = os.path.dirname(os.path.abspath(__file__))
     for k in range(n):
         current_path = os.path.dirname(current_path)
@@ -19,15 +19,14 @@ sys.path.append(utils_path)
 from Utils import (
     pdf_convertion,
   )
+from Extract_Utils import get_Strings
 
 from Image_Process_Utils import(
-
     read_and_trim,
     rescaling,
     get_grayscale,
     remove_noise,
     deskew,
-    get_Strings,
     pre_process
     )
 

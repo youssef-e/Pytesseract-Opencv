@@ -13,3 +13,9 @@ class Gender(Fields):
 				gender = word
 				break
 		return self.set_field(gender)
+
+	def synthax_check(self):
+		if len(self) != 1 or self.field == "-1":
+			print("Warning: Incorrect data")
+			return False
+		return True

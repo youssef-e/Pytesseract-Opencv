@@ -30,3 +30,9 @@ class Birthday(Fields):
 	def word_to_mrz (self):
 		date = self.split(" ")
 		return date[2][2:]+date[1]+date[0]
+
+	def synthax_check(self):
+		if len(self) != 10 or self.field == "-1":
+			print("Warning: Incorrect data")
+			return False
+		return True
