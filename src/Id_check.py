@@ -5,8 +5,6 @@ import argparse
 
 
 def get_parent_dir(n=1):
-	""" returns the n-th parent dicrectory of the current working directory."""
-
 	current_path = os.path.dirname(os.path.abspath(__file__))
 	for k in range(n):
 		current_path = os.path.dirname(current_path)
@@ -15,8 +13,8 @@ def get_parent_dir(n=1):
 utils_path = os.path.join(get_parent_dir(1), "Utils")
 sys.path.append(utils_path)
 
-from Classes.Fields import Fields
-from Classes.Mrz import Mrz
+# from Classes.Fields import Fields
+# from Classes.Mrz import Mrz
 from Classes.Name import Name
 from Classes.First_name import First_name
 from Classes.Gender import Gender
@@ -31,7 +29,6 @@ def get_key(input_string):
 	result = 0
 	i = -1
 	factors = [7, 3, 1]
-
 	for car in input_string:
 		if car == "<":
 			value = 0
@@ -45,7 +42,6 @@ def get_key(input_string):
 		else:
 			print("Character out of bonds")
 			break
-			
 		result += value * factors[i%3]
 	return result % 10
 
@@ -81,9 +77,7 @@ def from_string_to_fields(data):
 		data[c]=dispatcher[c](data[c])
 	return data
 
-
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
-
 arg = argparse.ArgumentParser()
 arg.add_argument(
 		"-i","--input",
@@ -106,4 +100,3 @@ print(data_integrity_check(data))
 # print(get_key(data['Id_number']))
 # print(birthday_to_MRZ(data['Birthday']))
 # print(get_key(birthday_to_MRZ(data['Birthday'])))
-
