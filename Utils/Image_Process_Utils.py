@@ -1,27 +1,11 @@
 from PIL import Image, ImageChops
-import pytesseract
 import cv2
 import os
 import numpy as np
 import re
 import math
-import fitz
-import json
-import unicodedata
+import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
-
-from Extract_Utils import(
-	fields_extract,
-	mean_word,
-	mean_mrz
-    )
-
-def pdf_convertion(input_file, output):
-    doc = fitz.open(input_file)
-    page = doc.loadPage(0) #number of page
-    pix = page.getPixmap()
-    input_file = output
-    pix.writePNG(input_file)
 
 def trim(im):
     bbox = get_box(im)
@@ -71,7 +55,7 @@ def remove_noise(image):
     # Apply blur to smooth out the edges
     img = cv2.GaussianBlur(img, (5, 5), 0)
     return img
- 
+
 #thresholding with different filters
 def apply_threshold(img,gray, argument):
     kernel = np.ones((1,1), np.uint8)
@@ -92,7 +76,7 @@ def apply_threshold(img,gray, argument):
         14: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
         15: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,8,75,75), 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 5, 2),
         16: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,7,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2),
-        17: cv2.adaptiveThreshold(cv2.bilateralFilter(gray,3,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 5, 2),
+        17: cv2.adaptiveThreshold(cv2.bilateralFilter(img,9,150,150), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 9, 2),
         18: cv2.adaptiveThreshold(cv2.bilateralFilter(img,8,75,75), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 7, 2),
         19: cv2.adaptiveThreshold(cv2.GaussianBlur(img, (5, 5), 0), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2),
         20: cv2.adaptiveThreshold(cv2.medianBlur(img, 3), 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2),
@@ -101,15 +85,12 @@ def apply_threshold(img,gray, argument):
     }
     return switcher.get(argument, "Invalid method")
 
-#deskew 
+#deskew
 def deskew(image):
-   
     # convert the image to grayscale and flip the foreground
     # and background to ensure foreground is now "white" and
     # the background is "black"
-    
     #This second bit detect smaller inclination angle and correct it
-
     # convert the image to grayscale and flip the foreground
     # and background to ensure foreground is now "white" and
     # the background is "black"
@@ -173,10 +154,16 @@ def deskew(image):
     else:
         print("[OSD] "+rot_data)
         rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
+        conf = re.search('(?<=Orientation confidence: )\d+', rot_data).group(0)
         #calculation of the correction angle
-        angle = float(rot)
+        if float(conf) > 0.7:
+            angle = float(rot)
+        else:
+            angle = 0
+
         if angle > 0:
             angle = 360 - angle
+
         print("[ANGLE 3] "+str(angle))
         # rotate the image to deskew it
         img_pil = Image.fromarray(image)
@@ -207,83 +194,3 @@ def pre_process(image, input_file):
     img = get_grayscale(img)
     img = remove_noise(img)
     return  (img, gray)
-
-#clean the text from empty lines
-def clean_result(text,char):
-	lines=text.split(char)
-	return [line for line in lines if line.strip() != ""]
-
-def get_Strings(image, gray, scores1,scores2):
-    names = []
-    fnames = []
-    id_nbrs = []
-    nationalities = []
-    genders = []
-    birthdays= []
-    mrz1s=[]
-    mrz2s=[]
-    for i in range(1,21):
-        thresh = apply_threshold(image,gray,i)
-        result = pytesseract.image_to_string(thresh, lang='fra')
-        result= unicodedata.normalize("NFKD",result).encode('ascii', 'ignore').decode('ascii')
-        print('#=======================================================')
-        print("#=================== filter "+str(i)+" ===================")
-        print('#=======================================================')
-        #print(result)
-        lines= clean_result(result, '\n')
-        for line in lines:
-            print(line)
-            print("~~~~~~")
-        idcard = fields_extract(lines)
-        names.append(idcard["name"])
-        fnames.append(idcard["fname"])
-        id_nbrs.append(idcard["id_nbr"])
-        nationalities.append(idcard["nationality"])
-        genders.append(idcard["gender"])
-        birthdays.append(idcard["birthday"])
-        mrz1s.append(idcard["mrz1"])
-        mrz2s.append(idcard["mrz2"])
-        cv2.imshow('img'+str(i), thresh)
-    
-    #result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
-    print('#=======================================================')
-    print('#==================== extracted data ===================')
-    print('#=======================================================')
-    print("~~~~~~~~ names ~~~~~~~")
-    for i, name in enumerate(names,1):
-        print(str(i)+": "+name+" len: "+ str(len(name)))
-    print("~~~~~~~~ fnames ~~~~~~~")
-    for i, fname in enumerate(fnames,1):
-        print(str(i)+": "+fname+" len: "+ str(len(fname)))
-    print("~~~~~~~~ id nbrs ~~~~~~~")
-    for i, id_nbr in enumerate(id_nbrs,1):
-        print(str(i)+": "+id_nbr+" len: "+ str(len(id_nbr)))
-    print("~~~~~~~~ nationality ~~~~~~~")
-    for i, nationality in enumerate(nationalities,1):
-        print(str(i)+": "+nationality+" len: "+str(len(nationality)))
-    print("~~~~~~~~ gender ~~~~~~~")
-    for i, gender in enumerate(genders,1):
-        print(str(i)+": "+gender+" len: "+str(len(genders)))
-    print("~~~~~~~~ birthday ~~~~~~~")
-    for i, birthday in enumerate(birthdays,1):
-        print(str(i)+": "+birthday+" len: "+str(len(birthday)))
-    print("~~~~~~~~ mrz 1 ~~~~~~~")
-    for i, mrz1 in enumerate(mrz1s,1):
-        print(str(i)+": "+mrz1+" len: "+str(len(mrz1)))
-    print("~~~~~~~~ mrz 2 ~~~~~~~")
-    for i, mrz2 in enumerate(mrz2s,1):
-        print(str(i)+": "+mrz2+" len: "+str(len(mrz2)))
-    
-    x = {
-    "Name" : mean_word(names,scores1),
-    "First_name" : mean_word(fnames,scores1),
-    "Id_number" : mean_word(id_nbrs,scores1),
-    "Nationality" : mean_word(nationalities,scores1),
-    "Gender" : mean_word(genders,scores1),
-    "Birthday" : mean_word(birthdays,scores1),
-    "MRZ_l1" : mean_mrz(mrz1s,scores2),
-    "MRZ_l2" : mean_mrz(mrz2s,scores2)
-    }
-    y=json.dumps(x,sort_keys=True,indent=4)
-    print(y)
-    return x
