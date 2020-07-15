@@ -28,7 +28,7 @@ class Birthday(Fields):
 		return self.set_field(result)
 
 	def word_to_mrz (self):
-		date = self.split(" ")
+		date = self.field.split(" ")
 		return date[2][2:]+date[1]+date[0]
 
 	def synthax_check(self):

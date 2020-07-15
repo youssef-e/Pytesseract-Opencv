@@ -49,13 +49,14 @@ class First_name(Fields):
 
 	def word_to_mrz(self):
 		result = ""
-		for i in range(14):
+		for i in range(15):
 			if i > len(self):
 				result +="<"
-			elif self[i] =="-":
+			elif i < len(self) and self[i] =="-":
 				result += "<"
-			elif self[i] == " ":
+			elif i < len(self) and self[i] == " ":
 				result+="<<"
 			else:
-				result += self[i]
-		return result[:14].upper()
+				if i < len(self):
+					result += self[i]
+		return result[:15].upper()
