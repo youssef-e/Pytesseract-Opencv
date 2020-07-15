@@ -15,3 +15,10 @@ class Mrz1(Mrz):
 		else:
 			result = "-1"
 		return self.set_field(result)
+
+	def name_mrz(self):
+		return self.field[5:30]
+	def location_mrz(self):
+		return self.field[30:33]
+	def agent_nbr_mrz(self):
+		return self.field[33:]
