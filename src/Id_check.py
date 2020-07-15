@@ -38,9 +38,9 @@ def distance(str1,str2):
 		D[0][j] = j
 		F[0][j] = 'r'
 
-	for i in range(len(str1)):
-		for j in range(len(str2)):
-			x = D[i][j]+cost(str1[i],str2[j])
+	for i,c1 in enumerate(str1):
+		for j,c2 in enumerate(str2):
+			x = D[i][j]+cost(c1,c2)
 			y = D[i+1][j]+1
 			z = D[i][j+1]+1
 			if x <= y and x <= z:
@@ -144,8 +144,8 @@ def compare_strings(mrz_str, str1):
 	(new_str1,new_str2)=print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
 	arrow =' '*len(new_str1)
 	cost = D[len(mrz_str)][len(str1)]
-	for i in range(len(new_str1)):
-		if(new_str2[i]!=new_str1[i]):
+	for i, c in enumerate(new_str1):
+		if(new_str2[i]!= c):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
 			print(new_str1)
 			print(arrow)
