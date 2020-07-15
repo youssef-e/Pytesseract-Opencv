@@ -22,11 +22,12 @@ class Name(Fields):
 
 	def word_to_mrz(self):
 		result = ""
-		for i in range(25):
+		for i in range(26):
 			if i > len(self):
 				result +="<"
-			elif self[i] =="'" or self[i] == " ":
+			elif i < len(self) and (self[i] =="'" or self[i] == " "):
 				result += "<"
 			else:
-				result += self[i]
+				if(i< len(self)):
+					result += self[i]
 		return result.upper()
