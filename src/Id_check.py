@@ -23,6 +23,7 @@ from Classes.Id_number import Id_number
 from Classes.Mrz1 import Mrz1
 from Classes.Mrz2 import Mrz2
 
+from Utils import query_yes_no
 
 def distance(str1,str2):
 	def cost(x,y):
@@ -112,7 +113,6 @@ def data_integrity_check(data):
 def compare_to_mrz(data):
 	data_object = from_string_to_fields(data)
 	name = data_object['Name'].word_to_mrz()
-	print(name)
 	fname = data_object['First_name'].word_to_mrz()
 	id_nbr = data_object['Id_number'].word_to_mrz()
 	gender = data_object['Gender'].word_to_mrz()
@@ -127,36 +127,45 @@ def compare_to_mrz(data):
 	mrz_location = mrz1.location_mrz()
 	mrz_agent_nbr = mrz1.agent_nbr_mrz()
 	print("name differences: ")
-	print(compare_strings(mrz_name,name))
+	name = compare_strings(mrz_name,name)
 	print("first name differences: ")
-	print(compare_strings(mrz_fname,fname))
+	fname = compare_strings(mrz_fname,fname)
 	print("id number differences: ")
-	print(compare_strings(mrz_id_nbr,id_nbr))
+	id_nbr =compare_strings(mrz_id_nbr,id_nbr)
 	print("birthday differences: ")
-	print(compare_strings(mrz_birthday,birthday))
+	birthday = compare_strings(mrz_birthday,birthday)
 	print("gender differences: ")
-	print(compare_strings(mrz_gender,gender))
+	gender = compare_strings(mrz_gender,gender)
 	print("location differences: ")
-	print(compare_strings(mrz_location,id_nbr[4:7]))
+	location = compare_strings(mrz_location,id_nbr[4:7])
 	mrz = mrz1.field + mrz2.field
-	compared_mrz = "IDFRA"+name+id_nbr[4:7]+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday))+gender
+	compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
 	compared_mrz += str(get_key(compared_mrz))
 	print("mrz differences: ")
 	print(compare_strings(mrz,compared_mrz))
 
 
 def compare_strings(mrz_str, str1):
-	(D,F)=distance(mrz_str, str1)
-	(new_str1,new_str2)=print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
+	(D,F) = distance(mrz_str, str1)
+	(new_str1,new_str2) = print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
 	arrow =' '*len(new_str1)
 	cost = D[len(mrz_str)][len(str1)]
 	for i, c in enumerate(new_str1):
 		if(new_str2[i]!= c):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
-	print(new_str1)
-	print(new_str2)
-	print(arrow)
-	return cost
+	if cost == 1:
+		print("mrz:   " + new_str1)
+		print("field: " + new_str2)
+		print("       " + arrow)
+		if query_yes_no("Small difference detected, it may result from the OCR inaccuracy.\n Would you like to replace it ?"):
+			index = arrow.index("^")
+			new_str2 =  new_str2[:index] + new_str1[index] + new_str2[index+1:]
+			arrow=arrow[:index]+' '+arrow[index+1:]
+			cost -= 1
+	print("mrz:   " + new_str1)
+	print("field: " + new_str2)
+	print("       " + arrow)
+	return new_str2
 
 
 def from_string_to_fields(data):
@@ -172,6 +181,10 @@ def from_string_to_fields(data):
 	for c in data:
 		data_object[c]=dispatcher[c](data[c])
 	return data_object
+
+"""
+--------- Main funtion ------------
+"""
 
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 arg = argparse.ArgumentParser()
@@ -194,6 +207,4 @@ print(str(data) + " len: "+ str(len(data)))
 print("data integrity check:")
 print(data_integrity_check(data))
 compare_to_mrz(data)
-# print(get_key(data['Id_number']))
-# print(birthday_to_MRZ(data['Birthday']))
-# print(get_key(birthday_to_MRZ(data['Birthday'])))
+
