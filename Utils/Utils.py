@@ -7,7 +7,8 @@ import sys
 
 
 def pdf_convertion(input_file, output):
-	"""convert a pdf input file into a pn.
+	"""
+	convert a pdf input file into a pn.
 
 	"input_file" is the path to the pdf file to convert.
 	"output" is the name of the output file and should contain the .png extention.
@@ -19,7 +20,8 @@ def pdf_convertion(input_file, output):
 	pix.writePNG(input_file)
 
 def query_yes_no(question, default="yes"):
-	"""Ask a yes/no question via input() and return their answer.
+	"""
+	Ask a yes/no question via input() and return their answer.
 
 	"question" is a string that is presented to the user.
 	"default" is the presumed answer if the user just hits <Enter>.

@@ -182,9 +182,9 @@ def from_string_to_fields(data):
 		data_object[c]=dispatcher[c](data[c])
 	return data_object
 
-"""
---------- Main funtion ------------
-"""
+
+#--------- Main funtion ------------#
+
 
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 arg = argparse.ArgumentParser()
