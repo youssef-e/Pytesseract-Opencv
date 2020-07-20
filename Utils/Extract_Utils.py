@@ -9,7 +9,6 @@ from Classes.Mrz1 import Mrz1
 from Classes.Mrz2 import Mrz2
 import json
 import os
-import sys
 import unicodedata
 import pytesseract
 
