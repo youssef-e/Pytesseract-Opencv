@@ -117,14 +117,15 @@ def compare_to_mrz(data):
 	id_nbr = data_object['Id_number'].word_to_mrz()
 	gender = data_object['Gender'].word_to_mrz()
 	birthday = data_object ['Birthday'].word_to_mrz()
-	mrz1 = data_object ['Mrz1'].word_to_mrz()
-	mrz2 = data_object ['Mrz2'].word_to_mrz()
-	mrz_name = mrz1[5:30]
-	mrz_fname = mrz2[13:27]
-	mrz_id_nbr = mrz2[:12]
-	mrz_birthday = mrz2[27:33]
-	mrz_gender = mrz2[34]
-	mrz_location = mrz1[30:33]
+	mrz1 = data_object ['Mrz1']
+	mrz2 = data_object ['Mrz2']
+	mrz_name = mrz1.name_mrz()
+	mrz_fname = mrz2.fname_mrz()
+	mrz_id_nbr = mrz2.id_nbr_mrz()
+	mrz_birthday = mrz2.birthday_mrz()
+	mrz_gender = mrz2.gender_mrz()
+	mrz_location = mrz1.location_mrz()
+	mrz_agent_nbr = mrz1.agent_nbr_mrz()
 	print("name differences: ")
 	print(compare_strings(mrz_name,name))
 	print("first name differences: ")
@@ -137,6 +138,11 @@ def compare_to_mrz(data):
 	print(compare_strings(mrz_gender,gender))
 	print("location differences: ")
 	print(compare_strings(mrz_location,id_nbr[4:7]))
+	mrz = mrz1.field + mrz2.field
+	compared_mrz = "IDFRA"+name+id_nbr[4:7]+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday))+gender
+	compared_mrz += str(get_key(compared_mrz))
+	print("mrz differences: ")
+	print(compare_strings(mrz,compared_mrz))
 
 
 def compare_strings(mrz_str, str1):
@@ -147,10 +153,9 @@ def compare_strings(mrz_str, str1):
 	for i, c in enumerate(new_str1):
 		if(new_str2[i]!= c):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
-			print(new_str1)
-			print(arrow)
-			print(new_str2)
-			print(arrow)
+	print(new_str1)
+	print(new_str2)
+	print(arrow)
 	return cost
 
 
