@@ -1,11 +1,24 @@
 from PIL import Image, ImageChops
 import cv2
 import os
+import sys
 import numpy as np
 import re
 import math
+import json
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'/Users/youssef/Application/Homebrew/Cellar/tesseract/4.1.1/bin/tesseract'
+
+def get_parent_dir(n=1):
+    current_path = os.path.dirname(os.path.abspath(__file__))
+    for k in range(n):
+        current_path = os.path.dirname(current_path)
+    return current_path
+
+config_file = os.path.join(get_parent_dir(1), "config.json")
+with open(config_file) as json_file:
+    config_paths = json.load(json_file)
+
+pytesseract.pytesseract.tesseract_cmd = config_paths["Tesseract_path"]
 
 def trim(im):
     bbox = get_box(im)
