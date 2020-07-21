@@ -38,7 +38,6 @@ def distance(str1,str2):
 	for j in range(1,len(str2)+1):
 		D[0][j] = j
 		F[0][j] = 'r'
-
 	for i,c1 in enumerate(str1):
 		for j,c2 in enumerate(str2):
 			x = D[i][j]+cost(c1,c2)

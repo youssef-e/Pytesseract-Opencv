@@ -166,9 +166,11 @@ def deskew(image):
 	else:
 		print("[OSD] "+rot_data)
 		rot = re.search('(?<=Rotate: )\d+', rot_data).group(0)
-		conf = re.search('(?<=Orientation confidence: )\d+', rot_data).group(0)
+		conf = re.search('(?<=Orientation confidence: )\d+\.\d*', rot_data).group(0)
 		#calculation of the correction angle
-		if float(conf) > 0.7:
+		print ("conf =",conf)
+		print(0.3)
+		if float(conf) > 0.30:
 			angle = float(rot)
 		else:
 			angle = 0
@@ -191,6 +193,14 @@ def get_box(im):
 	bbox = diff.getbbox()
 	return bbox
 
+def bounding_boxes(im):
+	(h, w) = im.shape[:2]
+	boxes = pytesseract.image_to_boxes(im) 
+	for b in boxes.splitlines():
+	   b = b.split(' ')
+	   im = cv2.rectangle(im, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+	return im
+
 def pre_process(image, input_file):
 	img = rescaling(image,input_file,"./")
 	img = deskew(img)
@@ -201,6 +211,12 @@ def pre_process(image, input_file):
 	box = get_box(img_thresh)
 	img_p = Image.fromarray(img)
 	img_p = img_p.crop(box)#2
+	# gray_p = Image.fromarray(gray)
+	# gray_p = gray_p.crop(box)
+	# gray = np.asarray(gray_p)
+	gray = rescaling(gray, input_file,"./")
+	gray = deskew(gray)
+	gray = get_grayscale(gray)
 	img = np.asarray(img_p)
 	img = rescaling(img,input_file,"./")
 	img = get_grayscale(img)
