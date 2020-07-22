@@ -59,4 +59,4 @@ class First_name(Fields):
 			else:
 				if i < len(self):
 					result += self[i]
-		return result[:15].upper()
+		return result[:14].upper()

@@ -1,4 +1,13 @@
 numpy==1.19.0
-opencv-python==4.1.1.26
+opencv-python==4.1.2.30
 Pillow==7.2.0
 pytesseract==0.3.4
+PyMuPDF==1.17.2
+werkzeug==0.15.3
+certifi==2018.11.29
+Click==7.0
+Flask==1.0.2
+gunicorn==19.9.0
+itsdangerous==1.1.0
+Jinja2>=2.10.1
+MarkupSafe==1.1.0

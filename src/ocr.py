@@ -34,6 +34,8 @@ from Image_Process_Utils import(
 #~~~~~~~~~~~~~~ Main function ~~~~~~~~~~~~~~~~~#
 #variable declaration
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
+sample_image_folder = os.path.join(get_parent_dir(n=1), "sample_image")
+sample_image =os.path.join(sample_image_folder, "_%6777622.jpg")
 
 #id fields score
 scores1={
@@ -66,7 +68,8 @@ scores2={
 ap = argparse.ArgumentParser()
 ap.add_argument(
     "-i", "--image",
-    required=True,
+    type=str,
+    default=sample_image,
     help="path to input image to be OCR'd"
 )
 
@@ -93,28 +96,30 @@ input_file = FLAGS.image
 delete = False
 
 #detect if the input file is a pdf, and if it is, covert it to png
-if(input_file.split(".")[len(input_file.split("."))-1]=="pdf"):
-    pdf_convertion(input_file, detection_results_folder+"/pdfToimage.png")
-    input_file = detection_results_folder+"/pdfToimage.png"
-    delete = True
-#read and trim the image from white borders
-img = read_and_trim(input_file)
-(img,gray) = pre_process(img, input_file)
-result = get_Strings(img, gray, scores1,scores2)
-if save_result:
+def run( input_f = input_file): 
+  if(input_f.split(".")[len(input_f.split("."))-1]=="pdf"):
+    pdf_convertion(input_f, detection_results_folder+"/pdfToimage.png")
+    input_f = detection_results_folder+"/pdfToimage.png"
+    #delete = True
+  #read and trim the image from white borders
+  img = read_and_trim(input_f)
+  (img,gray) = pre_process(img, input_f)
+  result = get_Strings(img, gray, scores1,scores2)
+  if save_result:
     detection_results_file = os.path.join(result_folder, "Detection_Results.json")
     with open(detection_results_file, 'w') as f:
-        json.dump(result, f,sort_keys=True,indent=4)
-else:
+      json.dump(result, f,sort_keys=True,indent=4)
+      return gray
+  else:
     print("no Json output")
 
 
 
-#cv2.imshow('img', img)
-if delete :
-    os.remove(input_file)
+  # #cv2.imshow('img', img)
+  # if delete :
+  #   os.remove(input_f)
 
-input("Press Enter to continue...")
+  #input("Press Enter to continue...")
 #3,5
 # show the output images
 #cv2.imshow("Input", img)
