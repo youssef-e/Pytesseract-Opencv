@@ -2,11 +2,11 @@ from flask import Flask, render_template, request
 from werkzeug import secure_filename
 import os
 import sys
-from PIL import Image
 import pytesseract
 import argparse
 import cv2
 import json
+import socket
 src_path = os.path.join(".", "src")
 sys.path.append(src_path)
 from ocr import (run, get_parent_dir)
@@ -59,6 +59,8 @@ def upload_file():
 
       return render_template("uploaded.html", displaytext= data, fname=imagename)
       # remove the processed image
-      os.remove(ofilename)
+   os.remove(ofilename)
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", port=5000, debug=True)
+   hostname = socket.gethostname()
+   ip_address = socket.gethostbyname(hostname)
+   app.run(host=ip_address, port=5000, debug=True)
