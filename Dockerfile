@@ -10,6 +10,6 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["whereis"]
+ENTRYPOINT ["python"]
 
-CMD ["tesseract"]
+CMD ["app.py"]
