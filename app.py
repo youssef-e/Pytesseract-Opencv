@@ -2,8 +2,6 @@ from flask import Flask, render_template, request
 from werkzeug import secure_filename
 import os
 import sys
-import pytesseract
-import argparse
 import cv2
 import json
 import socket

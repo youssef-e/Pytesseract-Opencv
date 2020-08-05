@@ -2,15 +2,10 @@
  * General
  */
 
-
-
 body {
   background-color: #f4f4f4;
   font-family: 'Open Sans', sans-serif;
 }
-
-
-
 
 /*
  * Header
@@ -30,7 +25,8 @@ header {
   margin: 0 20px;
 }
 
-.title a, .title a:visited {
+.title a,
+ .title a:visited {
   color: #3a3a3a;
 }
 
@@ -38,13 +34,12 @@ header {
   max-width: 400px;
   margin: 20px;
 }
+
 .image-container {
   margin: 0 auto;
 }
 
 .col-md-7_ocr-text {
-    font-size: .7rem;
-    margin: 0;
+  font-size: .7rem;
+  margin: 0;
 }
-
-
