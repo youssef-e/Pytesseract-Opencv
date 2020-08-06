@@ -169,7 +169,7 @@ def deskew(image):
 		#calculation of the correction angle
 		print ("conf =",conf)
 		print(0.3)
-		if float(conf) > 0.30:
+		if float(conf) > 0.75:
 			angle = float(rot)
 		else:
 			angle = 0
