@@ -35,10 +35,13 @@ class Mrz(Fields):
 			max_val=-1
 			key=""
 			for c in chars:
-				if ((c == "<" or c=="(" or c == "[" or c == "{") and chars[c]>3):
+				if((c == "<" and chars[c]>2)):
 					key = "<"
 					break
-				elif ((c == "S" or c == "C") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<") and chars[c] > 2):
+				if ((c=="(" or c == "[" or c == "{")):
+					key = "<"
+					break
+				elif ((c == "S" or c == "C" or c=="k" or c=="K" or c =="E") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<")):
 					key = "<"
 					break
 				elif chars[c]>=max_val:

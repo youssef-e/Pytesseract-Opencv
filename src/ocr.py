@@ -97,6 +97,7 @@ delete = False
 
 #detect if the input file is a pdf, and if it is, covert it to png
 def run( input_f = input_file): 
+  print("input_file::",input_f)
   if(input_f.split(".")[len(input_f.split("."))-1]=="pdf"):
     pdf_convertion(input_f, detection_results_folder+"/pdfToimage.png")
     input_f = detection_results_folder+"/pdfToimage.png"

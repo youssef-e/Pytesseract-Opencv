@@ -34,7 +34,6 @@ def upload_file():
 
       # create a secure filename
       filename = secure_filename(f.filename)
-
       # save file to /static/uploads
       filepath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
       f.save(filepath)
@@ -46,19 +45,35 @@ def upload_file():
       imagename = "{}.png".format(os.getpid())
       ofilename = os.path.join(app.config['UPLOAD_FOLDER'],imagename)
       cv2.imwrite(ofilename, gray)
+      print("ofilename::",ofilename)
+      print("imagename",imagename)
+      print("filename::",filename)
 
+      rslt = ""
       # perform OCR on the processed image
-   with open(detection_results_file) as json_file:
-      data = json.load(json_file)
-      
-      print(filename)
-      print(ofilename)
-     
+      with open(detection_results_file) as json_file:
+         data = json.load(json_file)
+      for c in data:
+         rslt += c +" : "+ data[c] + "\n"
 
-      return render_template("uploaded.html", displaytext= data, fname=imagename)
+      # os.remove(ofilename)
+      os.remove(filepath)
+      return render_template("uploaded.html", displaytext= rslt, fname=imagename)
       # remove the processed image
-   os.remove(ofilename)
+
+   if request.method == 'GET':
+      imagename = "{}.png".format(os.getpid())
+      ofilename = os.path.join(app.config['UPLOAD_FOLDER'],imagename)
+      rslt = ""
+      # perform OCR on the processed image
+      with open(detection_results_file) as json_file:
+         data = json.load(json_file)
+      for c in data:
+         rslt += c +" : "+ data[c] + "\n"
+      # os.remove(ofilename)
+      return render_template("uploaded.html", displaytext= rslt, fname=imagename)
+
 if __name__ == '__main__':
    hostname = socket.gethostname()
-   ip_address = socket.gethostbyname(hostname)
+   ip_address = socket.gethostbyname('localhost')
    app.run(host=ip_address, port=5000, debug=True)
