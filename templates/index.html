@@ -16,8 +16,16 @@
       <form action = "/uploader" method = "POST" 
         enctype = "multipart/form-data">
         <input type = "file" name = "file" />
-        <input type = "submit"/>
+        <input type="submit" name="anything_submit" value="Submit" onclick="loading();">
       </form>
+       <script type="text/javascript">
+        function loading(){
+            $("#loader").show();
+            $("#content").hide();       
+        }
+        </script>
+        <div id="loader"></div>
+        <div id="content"></div>
     </div>
   
 

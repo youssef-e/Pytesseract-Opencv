@@ -35,7 +35,7 @@ from Image_Process_Utils import(
 #variable declaration
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 sample_image_folder = os.path.join(get_parent_dir(n=1), "sample_image")
-sample_image =os.path.join(sample_image_folder, "_%6777622.jpg")
+sample_image = os.path.join(sample_image_folder, "_%6777622.jpg")
 
 #id fields score
 scores1={
@@ -109,9 +109,10 @@ def run( input_f = input_file):
     detection_results_file = os.path.join(result_folder, "Detection_Results.json")
     with open(detection_results_file, 'w') as f:
       json.dump(result, f,sort_keys=True,indent=4)
-      return gray
+    return gray
   else:
     print("no Json output")
+    return gray
 
 
 

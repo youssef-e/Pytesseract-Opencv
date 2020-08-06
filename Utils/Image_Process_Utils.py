@@ -99,6 +99,26 @@ def apply_threshold(img,gray, argument):
 
 #deskew
 def deskew(image):
+	try:
+		img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+		img_edges = cv2.Canny(img_gray, 100, 100, apertureSize=3)
+		lines = cv2.HoughLinesP(img_edges, 1, math.pi / 180.0, 100, minLineLength=100, maxLineGap=5)
+		angles = []
+
+		for x1, y1, x2, y2 in lines[0]:
+			cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 3)
+			angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
+			angles.append(angle)
+
+			median_angle = np.median(angles)
+			print("[ANGLE] "+str(median_angle))
+			img_pil = Image.fromarray(image)
+			img_pil = img_pil.rotate(median_angle, expand=True)
+		#convert the pil image to cv2 image
+		image = np.asarray(img_pil)
+	except TypeError:
+		print("image too small to deskew")
+
 	# convert the image to grayscale and flip the foreground
 	# and background to ensure foreground is now "white" and
 	# the background is "black"
@@ -129,33 +149,12 @@ def deskew(image):
 	else:
 		angle = -angle
 	# rotate the image to deskew it
-	print("[ANGLE] "+str(angle))
+	print("[ANGLE 2] "+str(angle))
 	(h, w) = image.shape[:2]
 	center = (w // 2, h // 2)
 	M = cv2.getRotationMatrix2D(center, angle, 1.0)
 	image = cv2.warpAffine(image, M, (w, h),
 	   flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-	try:
-		img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-		img_edges = cv2.Canny(img_gray, 100, 100, apertureSize=3)
-		lines = cv2.HoughLinesP(img_edges, 1, math.pi / 180.0, 100, minLineLength=100, maxLineGap=5)
-		angles = []
-
-		for x1, y1, x2, y2 in lines[0]:
-			cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 3)
-			angle = math.degrees(math.atan2(y2 - y1, x2 - x1))
-			angles.append(angle)
-
-			median_angle = np.median(angles)
-			print("[ANGLE 2] "+str(median_angle))
-			img_pil = Image.fromarray(image)
-			img_pil = img_pil.rotate(median_angle, expand=True)
-		#convert the pil image to cv2 image
-		image = np.asarray(img_pil)
-	except TypeError:
-		print("image too small to deskew")
-	#this bit detect if the image is upside down or at 90 or 270 degree
-	#then rotate it
 	try:
 		gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 		gray = cv2.bitwise_not(gray)

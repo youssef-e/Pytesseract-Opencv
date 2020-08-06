@@ -13,12 +13,18 @@
             <form action = "/uploader" method = "POST" 
                               enctype = "multipart/form-data">
                 <input type = "file" name = "file" />
-                <input type = "submit"/>
+                <input type="submit" name="anything_submit" value="Submit" onclick="loading();">
             </form>
         </div>        
     </div>
-    <div class="col-md-7_ocr-text">
-        <p class="text-left">OCR Text from processed Image</p>
+    <script type="text/javascript">
+        function loading(){
+            $("#loader").show();
+            $("#content").hide();       
+        </script>
+    <div id="loader"></div>
+    <div id="content">
+        <p class="text-left" id="col-md-7_ocr-text">OCR Text from processed Image</p>
         <pre>{{ displaytext }}</pre>
     </div>
 </div>  
