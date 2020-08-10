@@ -35,6 +35,10 @@ header {
   margin: 20px;
 }
 
+#success{
+  color: #4CAF50;
+}
+
 .image-container {
   margin: 0 auto;
 }
@@ -48,7 +52,7 @@ header {
 }
 
 #loading {
-  margin-left: 50%;
+  margin-left: 40%;
   margin-right: 50%;
   padding-top: 10px;
   display: none;
