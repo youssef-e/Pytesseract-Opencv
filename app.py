@@ -30,6 +30,7 @@ def about():
 
 @app.route('/uploader', methods = ['GET', 'POST'])
 def upload_file():
+   global current_image_number
    if request.method == 'POST':    
       try:
          imagename = "{}.png".format(current_image_number)

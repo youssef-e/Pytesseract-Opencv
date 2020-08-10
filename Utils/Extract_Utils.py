@@ -116,7 +116,7 @@ def get_Strings(image, gray, scores1,scores2):
 		print('#=======================================================')
 		print("#=================== filter "+str(i)+" ===================")
 		print('#=======================================================')
-		#print(result)
+
 		lines= clean_result(result, '\n')
 		for line in lines:
 			print(line)
@@ -129,9 +129,7 @@ def get_Strings(image, gray, scores1,scores2):
 		birthdays.append(idcard["birthday"])
 		mrz1s.append(idcard["mrz1"])
 		mrz2s.append(idcard["mrz2"])
-		#cv2.imshow('img'+str(i), thresh)
-	
-	#result = unicodedata.normalize("NFKD",pytesseract.image_to_string(image, lang='fra')).encode('ascii', 'ignore').decode("utf-8")
+
 	print('#=======================================================')
 	print('#==================== extracted data ===================')
 	print('#=======================================================')

@@ -42,9 +42,6 @@ class Fields:
 		mean_lengths=[]
 		max_occur=0
 		mean_length=0
-		for i,word in enumerate(words):
-			if str(word) != "-1" and (i<1 or i>9):
-				mean_lengths.append(len(word))
 		if len(mean_lengths) <= 1:
 			mean_lengths = []
 			for i,word in enumerate(words):
