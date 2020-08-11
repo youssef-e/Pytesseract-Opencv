@@ -3,16 +3,15 @@
 {% block content %}
 <p class="text-left" id="success">{{ fname }} successfully uploaded.</p>
 <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-4">
         <div class="image-container">
             <p class="text-left">Original Image</p>     
             <a href="/static/uploads/{{ fname }}" target="_new"><img src="/static/uploads/{{ fname }}" class="upload-image-thumb"></a>
         </div>
         <div class="upload-form">
             <p class="text-left">Upload another?</p>
-            <form action = "/uploader" method = "POST" 
-                              enctype = "multipart/form-data">
-                <input type = "file" name = "file" />
+            <form action="/uploader" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" />
                  <script type="text/javascript">
                     function loading(){
                         $("#loading").show();
@@ -25,9 +24,18 @@
     </div>
    
     <div id="loading"></div>
-    <div id="content">
+    <div id="content" class="col-md-6">
         <p class="text-left" id="col-md-7_ocr-text">OCR Text from processed Image</p>
-        <pre>{{ displaytext }}</pre>
+        <form>
+             <div class="form-row">
+                {% for key in data %}
+                    <label for="{{ key }}" class="col-sm-2 col-form-label">{{ key }}</label>
+                    <div class="col-sm-10">
+                        <input type="text" readonly class="form-control-plaintext" id="{{ key }}" value="{{ data[key] }}">
+                    </div>
+                {% endfor %}
+            </div>
+        </form>
     </div>
 </div>  
 {% endblock %}

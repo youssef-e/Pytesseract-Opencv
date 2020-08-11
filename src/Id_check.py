@@ -64,7 +64,7 @@ def print_alignment(F, i, j,str1,str2):
 			i-=1
 			j-=1
 		elif F[i][j] == 'r':
-			ns1=' '+ns1
+			ns1=ns1
 			ns2=str2[j-1]+ns2
 			j-=1
 		else:
@@ -110,6 +110,7 @@ def data_integrity_check(data):
 
 #def compare_fields_to_mrz(data):
 def compare_to_mrz(data):
+	#converting fields to mrz
 	data_object = from_string_to_fields(data)
 	name = data_object['Name'].word_to_mrz()
 	fname = data_object['First_name'].word_to_mrz()
@@ -118,6 +119,7 @@ def compare_to_mrz(data):
 	birthday = data_object ['Birthday'].word_to_mrz()
 	mrz1 = data_object ['Mrz1']
 	mrz2 = data_object ['Mrz2']
+	#extracting relevant data from mrz
 	mrz_name = mrz1.name_mrz()
 	mrz_fname = mrz2.fname_mrz()
 	mrz_id_nbr = mrz2.id_nbr_mrz()
@@ -125,6 +127,7 @@ def compare_to_mrz(data):
 	mrz_gender = mrz2.gender_mrz()
 	mrz_location = mrz1.location_mrz()
 	mrz_agent_nbr = mrz1.agent_nbr_mrz()
+	#comparing the fields with their corresponding mrz data
 	print("name differences: ")
 	name = compare_strings(mrz_name,name)
 	print("first name differences: ")
@@ -137,6 +140,7 @@ def compare_to_mrz(data):
 	gender = compare_strings(mrz_gender,gender)
 	print("location differences: ")
 	location = compare_strings(mrz_location,id_nbr[4:7])
+	#comparing the extracted mrz with the reconstructed one(including the control keys)
 	mrz = mrz1.field + mrz2.field
 	compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
 	compared_mrz += str(get_key(compared_mrz))
@@ -148,10 +152,13 @@ def compare_strings(mrz_str, str1):
 	(D,F) = distance(mrz_str, str1)
 	(new_str1,new_str2) = print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
 	arrow =' '*len(new_str1)
-	cost = D[len(mrz_str)][len(str1)]
+	cost = 0
+	if (len(new_str2)-len(new_str1)==1):	
+		new_str2=new_str2[:len(new_str2)-1]
 	for i, c in enumerate(new_str1):
 		if(new_str2[i]!= c):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
+			cost+=1
 	if cost == 1:
 		print("mrz:   " + new_str1)
 		print("field: " + new_str2)

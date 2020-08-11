@@ -70,7 +70,7 @@ def upload_file():
 
       
       os.remove(filepath)
-      return render_template("uploaded.html", displaytext= rslt, fname=imagename)
+      return render_template("uploaded.html", data=data, fname=imagename)
       
    if request.method == 'GET':
       imagename = "{}.png".format(current_image_number)
@@ -82,7 +82,7 @@ def upload_file():
       for c in data:
          rslt += c +" : "+ data[c] + "\n"
       # os.remove(ofilename)
-      return render_template("uploaded.html", displaytext= rslt, fname=imagename)
+      return render_template("uploaded.html", data=data, fname=imagename)
 
 if __name__ == '__main__':
    hostname = socket.gethostname()
