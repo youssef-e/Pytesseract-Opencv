@@ -104,6 +104,7 @@ def data_integrity_check(data):
 		print("Warning: Missing data in JSon file")
 		return False
 	else:
+
 		for c in data_object:
 			if not data_object[c].synthax_check():
 				return False
@@ -120,40 +121,45 @@ def compare_to_mrz(data):
 	birthday = data_object ['Birthday'].word_to_mrz()
 	mrz1 = data_object ['Mrz1']
 	mrz2 = data_object ['Mrz2']
-	#extracting relevant data from mrz
-	mrz_name = mrz1.name_mrz()
-	mrz_fname = mrz2.fname_mrz()
-	mrz_id_nbr = mrz2.id_nbr_mrz()
-	mrz_birthday = mrz2.birthday_mrz()
-	mrz_gender = mrz2.gender_mrz()
-	mrz_location = mrz1.location_mrz()
-	mrz_agent_nbr = mrz1.agent_nbr_mrz()
-	#comparing the fields with their corresponding mrz data
-	print("name differences: ")
-	(name, name_diff )= compare_strings(mrz_name,name, 'Name')
-	print("first name differences: ")
-	(fname,fname_diff) = compare_strings(mrz_fname,fname,'First_name')
-	print("id number differences: ")
-	(id_nbr, id_nbr_diff) =compare_strings(mrz_id_nbr,id_nbr,'Id_number')
-	print("birthday differences: ")
-	(birthday, birthday_diff) = compare_strings(mrz_birthday,birthday,'Birthday')
-	print("gender differences: ")
-	(gender,gender_diff) = compare_strings(mrz_gender,gender,'Gender')
-	print("location differences: ")
-	(location,location_diff) = compare_strings(mrz_location,id_nbr[4:7],'Field')
-	#comparing the extracted mrz with the reconstructed one(including the control keys)
-	mrz = mrz1.field + mrz2.field
-	compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
-	compared_mrz += str(get_key(compared_mrz))
-	print("mrz differences: ")
-	(mrz, mrz_diff)= compare_strings(mrz,compared_mrz,'MRZ',False)
-	new_data = {
-		'Name': name_diff,
-		'First_name': fname_diff,
-		'Id_number': id_nbr_diff,
-		'Birthday': birthday_diff,
-		'Gender': gender_diff,
-		'Mrz': mrz_diff
+	if mrz1.synthax_check() and mrz2.synthax_check() :
+		#extracting relevant data from mrz
+		mrz_name = mrz1.name_mrz()
+		mrz_fname = mrz2.fname_mrz()
+		mrz_id_nbr = mrz2.id_nbr_mrz()
+		mrz_birthday = mrz2.birthday_mrz()
+		mrz_gender = mrz2.gender_mrz()
+		mrz_location = mrz1.location_mrz()
+		mrz_agent_nbr = mrz1.agent_nbr_mrz()
+		#comparing the fields with their corresponding mrz data
+		print("name differences: ")
+		(name, name_diff )= compare_strings(mrz_name,name, 'Name')
+		print("first name differences: ")
+		(fname,fname_diff) = compare_strings(mrz_fname,fname,'First_name')
+		print("id number differences: ")
+		(id_nbr, id_nbr_diff) =compare_strings(mrz_id_nbr,id_nbr,'Id_number')
+		print("birthday differences: ")
+		(birthday, birthday_diff) = compare_strings(mrz_birthday,birthday,'Birthday')
+		print("gender differences: ")
+		(gender,gender_diff) = compare_strings(mrz_gender,gender,'Gender')
+		print("location differences: ")
+		(location,location_diff) = compare_strings(mrz_location,id_nbr[4:7],'Field')
+		#comparing the extracted mrz with the reconstructed one(including the control keys)
+		mrz = mrz1.field + mrz2.field
+		compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
+		compared_mrz += str(get_key(compared_mrz))
+		print("mrz differences: ")
+		(mrz, mrz_diff)= compare_strings(mrz,compared_mrz,'MRZ',False)
+		new_data = {
+			'Name': name_diff,
+			'First_name': fname_diff,
+			'Id_number': id_nbr_diff,
+			'Birthday': birthday_diff,
+			'Gender': gender_diff,
+			'Mrz': mrz_diff
+			}
+	else:
+		new_data = {
+			"error":"mrz is incorrect"
 		}
 	print(json.dumps(new_data,sort_keys=False,indent=4))
 	return new_data
