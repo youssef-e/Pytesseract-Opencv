@@ -22,6 +22,7 @@ from Classes.Birthday import Birthday
 from Classes.Id_number import Id_number
 from Classes.Mrz1 import Mrz1
 from Classes.Mrz2 import Mrz2
+from Classes.Fields import Fields
 
 from Utils import query_yes_no
 
@@ -129,69 +130,106 @@ def compare_to_mrz(data):
 	mrz_agent_nbr = mrz1.agent_nbr_mrz()
 	#comparing the fields with their corresponding mrz data
 	print("name differences: ")
-	name = compare_strings(mrz_name,name)
+	(name, name_diff )= compare_strings(mrz_name,name, 'Name')
 	print("first name differences: ")
-	fname = compare_strings(mrz_fname,fname)
+	(fname,fname_diff) = compare_strings(mrz_fname,fname,'First_name')
 	print("id number differences: ")
-	id_nbr =compare_strings(mrz_id_nbr,id_nbr)
+	(id_nbr, id_nbr_diff) =compare_strings(mrz_id_nbr,id_nbr,'Id_number')
 	print("birthday differences: ")
-	birthday = compare_strings(mrz_birthday,birthday)
+	(birthday, birthday_diff) = compare_strings(mrz_birthday,birthday,'Birthday')
 	print("gender differences: ")
-	gender = compare_strings(mrz_gender,gender)
+	(gender,gender_diff) = compare_strings(mrz_gender,gender,'Gender')
 	print("location differences: ")
-	location = compare_strings(mrz_location,id_nbr[4:7])
+	(location,location_diff) = compare_strings(mrz_location,id_nbr[4:7],'Field')
 	#comparing the extracted mrz with the reconstructed one(including the control keys)
 	mrz = mrz1.field + mrz2.field
 	compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
 	compared_mrz += str(get_key(compared_mrz))
 	print("mrz differences: ")
-	print(compare_strings(mrz,compared_mrz))
+	(mrz, mrz_diff)= compare_strings(mrz,compared_mrz,'MRZ',False)
+	new_data = {
+		'Name': name_diff,
+		'First_name': fname_diff,
+		'Id_number': id_nbr_diff,
+		'Birthday': birthday_diff,
+		'Gender': gender_diff,
+		'Mrz': mrz_diff
+		}
+	print(json.dumps(new_data,sort_keys=False,indent=4))
+	return new_data
 
-
-def compare_strings(mrz_str, str1):
+def compare_strings(mrz_str, str1, obj_type, correct=True):
 	(D,F) = distance(mrz_str, str1)
-	(new_str1,new_str2) = print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
-	arrow =' '*len(new_str1)
+	(mrz,new_str) = print_alignment(F,len(mrz_str),len(str1),mrz_str,str1)
+	arrow =' '*len(mrz)
 	cost = 0
-	if (len(new_str2)-len(new_str1)==1):	
-		new_str2=new_str2[:len(new_str2)-1]
-	for i, c in enumerate(new_str1):
-		if(new_str2[i]!= c):
+	if (len(new_str)-len(mrz)==1):	
+		new_str=new_str[:len(new_str)-1]
+	for i, c in enumerate(mrz):
+		if(new_str[i]!= c):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
 			cost+=1
-	if cost == 1:
-		print("mrz:   " + new_str1)
-		print("field: " + new_str2)
-		print("       " + arrow)
-		if query_yes_no("Small difference detected, it may result from the OCR inaccuracy.\n Would you like to replace it ?"):
-			index = arrow.index("^")
-			new_str2 =  new_str2[:index] + new_str1[index] + new_str2[index+1:]
+	initial_cost = cost
+	if cost <= 3 and correct:
+		if len(str1)<3 and cost>0:
+			cost=1
+		while cost > 0:
+			print("mrz:   " + mrz)
+			print("field: " + new_str)
+			print("       " + arrow)
+			index = arrow.find("^")
+			new_str =  new_str[:index] + mrz[index] + new_str[index+1:]
 			arrow=arrow[:index]+' '+arrow[index+1:]
 			cost -= 1
-	print("mrz:   " + new_str1)
-	print("field: " + new_str2)
+	print("mrz:   " + mrz)
+	print("field: " + new_str)
 	print("       " + arrow)
-	return new_str2
+	if obj_type == 'MRZ':
+		field = {
+		"original" : str1,
+		"modified" : new_str,
+		"cost" : initial_cost
+	}
+	else:
+		field = {
+		"original" : from_string_to_field(str1,obj_type).mrz_to_word(),
+		"modified" : from_string_to_field(new_str,obj_type).mrz_to_word(),
+		"cost" : initial_cost
+	}
+	return (new_str,field)
 
 
 def from_string_to_fields(data):
 	data_object ={}
-	dispatcher={'Name':Name,
-			'First_name':First_name,
-			'Id_number': Id_number,
-			'Gender':Gender,
-			'Birthday':Birthday,
-			'Mrz1':Mrz1,
-			'Mrz2':Mrz2
-			}
+	dispatcher={
+		'Name':Name,
+		'First_name':First_name,
+		'Id_number': Id_number,
+		'Gender':Gender,
+		'Birthday':Birthday,
+		'Mrz1':Mrz1,
+		'Mrz2':Mrz2,
+		'Field':Fields
+		}
 	for c in data:
 		data_object[c]=dispatcher[c](data[c])
 	return data_object
 
+def from_string_to_field(string, type):
+	dispatcher={
+		'Name':Name,
+		'First_name':First_name,
+		'Id_number': Id_number,
+		'Gender':Gender,
+		'Birthday':Birthday,
+		'Mrz1':Mrz1,
+		'Mrz2':Mrz2,
+		'Field':Fields
+		}
+	result=dispatcher[type](string)
+	return result
 
 #--------- Main funtion ------------#
-
-
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 arg = argparse.ArgumentParser()
 arg.add_argument(
@@ -201,16 +239,19 @@ arg.add_argument(
 		help="Output path for detection results. Default is "
 		+ detection_results_folder,
 		)
-
 FLAGS = arg.parse_args()
 result_folder=FLAGS.input
 detection_results_file = os.path.join(result_folder, "Detection_Results.json")
+id_check_results_file = os.path.join(result_folder, "Id_check_Results.json")
+def check():
+	with open(detection_results_file) as json_file:
+		data = json.load(json_file)
 
-with open(detection_results_file) as json_file:
-	data = json.load(json_file)
-
-print(str(data) + " len: "+ str(len(data)))
-print("data integrity check:")
-print(data_integrity_check(data))
-compare_to_mrz(data)
+	print(str(data) + " len: "+ str(len(data)))
+	print("data integrity check:")
+	print(data_integrity_check(data))
+	new_data = compare_to_mrz(data)
+	with open(id_check_results_file, 'w') as f:
+		json.dump(new_data, f,sort_keys=False,indent=4)
+check()
 

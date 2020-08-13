@@ -1,4 +1,5 @@
 from Classes.Fields import Fields
+from datetime import datetime
 
 class Birthday(Fields):
 
@@ -36,3 +37,17 @@ class Birthday(Fields):
 			print("Warning: Incorrect data")
 			return False
 		return True
+
+	def mrz_to_word(self):
+		word=""
+		now = datetime.now() # current date and time
+		actual_year = [int(now.strftime("%Y")[:2]),int(now.strftime("%Y")[2:])]
+		year = int(self.field[:2])
+		if year > actual_year[1]:
+			year = (actual_year[0]-1)*100 + year
+		else:
+			year = actual_year[0]*100 + year
+		month = self.field[2:4]
+		day = self.field[4:]
+		word = day+"/"+month+"/"+str(year)
+		return word

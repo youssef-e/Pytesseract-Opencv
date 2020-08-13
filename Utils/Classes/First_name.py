@@ -60,3 +60,19 @@ class First_name(Fields):
 				if i < len(self):
 					result += self[i]
 		return result[:14].upper()
+
+	def mrz_to_word(self):
+		word=""
+		counter = 0
+		for c in self.field:
+			if c != "<" and counter == 0:
+				word += c
+			elif c != "<" and counter == 1:
+				counter = 0
+				word += "-" + c
+			elif c != "<" and counter == 2:
+				counter = 0
+				word += " " + c
+			else:
+				counter += 1
+		return word

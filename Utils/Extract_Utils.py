@@ -164,6 +164,6 @@ def get_Strings(image, gray, scores1,scores2):
 	"Mrz1" : Mrz.mean_word(mrz1s,scores2),
 	"Mrz2" : Mrz.mean_word(mrz2s,scores2)
 	}
-	y=json.dumps(x,sort_keys=True,indent=4)
+	y=json.dumps(x,sort_keys=False,indent=4)
 	print(y)
 	return x

@@ -110,7 +110,7 @@ def run( input_f = input_file):
   if save_result:
     detection_results_file = os.path.join(result_folder, "Detection_Results.json")
     with open(detection_results_file, 'w') as f:
-      json.dump(result, f,sort_keys=True,indent=4)
+      json.dump(result, f,sort_keys=False,indent=4)
     return gray
   else:
     print("no Json output")

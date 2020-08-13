@@ -90,9 +90,9 @@ class Fields:
 	def word_to_mrz(self):
 		return self.field
 
-	def mrz_to_word(mrz):
+	def mrz_to_word(self):
 		word=""
-		for c in mrz:
+		for c in self.field:
 			if c != "<":
 				word += c
 		return word
