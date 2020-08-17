@@ -38,7 +38,7 @@ def fields_extract(extracted_lines):
 	mrz2 = Mrz2("-1")
 	for i, extracted_line in enumerate(extracted_lines):
 		line = extracted_line
-		if ((" Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line) or ("Now" in line)):
+		if (("Nom" in line ) or (" Mom" in line) or (" nom" in line) or (" Non " in line) or (" non" in line) or ("Now" in line)):
 			if not is_found(name):
 				name.extract(line)
 		elif (("Pren" in line) or ("preno" in line) or ("Prenom" in line) or ("Pre" in line)):
@@ -47,20 +47,19 @@ def fields_extract(extracted_lines):
 			try:
 				line=extracted_lines[i+1]
 			except IndexError:
-				birthday.set_field("-1")
-				gender.set_field("-1")
+				print("IndexError:(bithday, gender) line",i)
 			else:
 				if not is_found(birthday):
 					birthday.extract(line)
 				if not is_found(gender):
 					gender.extract(line)
 		elif (("ationale" in line.lower()) or ("carte" in line.lower()) or (" identite" in line.lower())):
-			if not is_found(name):
+			if not is_found(id_nbr):
 				id_nbr.extract(line)
 			try:
 				line=extracted_lines[i+1]
 			except IndexError:
-				name.set_field("-1")
+				print("IndexError: line",i)
 			else:
 				if not is_found(name):
 					name.extract(line)
@@ -72,7 +71,6 @@ def fields_extract(extracted_lines):
 				try:
 					line=extracted_lines[i+1]
 				except IndexError:
-					mrz2.set_field("-1")
 					print("mrz2 not found")
 				else:
 					if not is_found(mrz2):

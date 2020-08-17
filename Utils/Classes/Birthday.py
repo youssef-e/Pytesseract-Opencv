@@ -20,16 +20,17 @@ class Birthday(Fields):
 		except IndexError:
 			result="-1"
 		else:
-			for c in result:
+			for i,c in enumerate(result):
 				if((c <'0' or c>'9') and (c!=" ")):
-					result=result.replace(c,"")
+					result=result[:i]+result[i+1:]
 			if len(result)!= 10:
 				result ="-1"
 		#however if the image is too small, they may not be any lines below the firstname, it then sends an error
 		return self.set_field(result)
 
 	def word_to_mrz (self):
-		date = self.field.split(" ")
+		date = self.field.replace('/',' ')
+		date = date.split(" ")
 		return date[2][2:]+date[1]+date[0]
 
 	def synthax_check(self):

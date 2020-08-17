@@ -19,13 +19,6 @@ class Mrz(Fields):
 			mean_length = 0
 		return mean_length
 
-
-	def synthax_check(self):
-		if len(self) != 36 or self.field == "-1":
-			print("Warning: Incorrect data")
-			return False
-		return True
-
 	def mean_word( words, scores):
 		mean_len = Mrz.mean_length(words)
 		final_word = ""
@@ -41,9 +34,10 @@ class Mrz(Fields):
 				if ((c=="(" or c == "[" or c == "{")):
 					key = "<"
 					break
-				elif ((c == "S" or c == "C" or c=="k" or c=="K" or c =="E") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<")):
-					key = "<"
-					break
+				elif ((c == "S" or c == "C" or c=="k" or c=="K" or c =="E") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<") and chars[c]<5):
+					if '<' in chars :
+						key = "<"
+						break
 				elif chars[c]>=max_val:
 					max_val=chars[c]
 					key = c

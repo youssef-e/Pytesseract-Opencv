@@ -12,6 +12,12 @@ class Mrz1(Mrz):
 		if ("-1" not in mrz):
 			#clean the unnecessary caracters from the extracted str
 			result = Fields.clean_alphanum(mrz)
+			while len(result)>36:
+				index = result.find('<',20)
+				if index != -1:
+					result = result[:index] + result[index+1:]
+				else:
+					break
 		else:
 			result = "-1"
 		return self.set_field(result)
@@ -22,3 +28,10 @@ class Mrz1(Mrz):
 		return self.field[30:33]
 	def agent_nbr_mrz(self):
 		return self.field[33:]
+
+	def synthax_check(self):
+		if len(self) != 36 or self.field == "-1":
+			error="Warning: Incorrect lenght : MRZ1"
+			print(error)
+			return (False,error)
+		return (True,"")

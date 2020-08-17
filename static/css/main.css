@@ -72,3 +72,11 @@ header {
 .form-control-plaintext {
   background-color: white;
 }
+
+.col-form-label {
+    padding-top: calc(.375rem + 20px);
+}
+
+.popover-content {
+    word-wrap: break-word;
+}

@@ -25,17 +25,46 @@
    
     <div id="loading"></div>
     <div id="content" class="col-md-6">
+        <script type="text/javascript">
+            function toggle_popover() {
+            $('[data-toggle="popover"]').popover()}
+        </script>
         <p class="text-left" id="col-md-7_ocr-text">OCR Text from processed Image</p>
-        <form>
-             <div class="form-row">
+        <form method="POST" action="/correct-data" name="correct_data">
+            {% if 'error' in data_check %}
                 {% for key in data %}
-                    <label for="{{ key }}" class="col-sm-2 col-form-label">{{ key }}</label>
-                    <div class="col-sm-10">
-                        <input type="text" readonly class="form-control-plaintext" id="{{ key }}" value="{{ data[key] }}">
+                    <div class="form-row">
+                        <label for="{{ key }}" class="col col-form-label">{{ key }} :</label>
+                        <div class="col-10">
+                            <input type="text" class="form-control-plaintext" id="{{ key }}" value="{{ data[key] }}" name="{{key}}">
+                        </div>
                     </div>
                 {% endfor %}
-            </div>
+                <p>Error: {{ data_check['error'] }}</p>
+                <input type="submit" name="submit" value="Valider" />
+            {% else %}
+                {% for key in data_check %}
+                    <div class="form-row">
+                        <label for="{{ key }}" class="col col-form-label">{{ key }} :</label>
+                        <div class="col-10">
+                            <div class ="row">
+                            {% if data_check[key]['cost'] == 0 %}
+                                <input type="text" class="form-control-plaintext col-9" id="{{ key }}" value="{{ data_check[key]['original'] }}" name="{{key}}">
+                                <button type="button" class="btn btn-outline-success col-2">correct</button>
+                            {% elif data_check[key]['cost'] > 0 and data_check[key]['cost'] < 2 %}
+                                <input type="text" class="form-control-plaintext col-9" id="{{ key }}" value="{{ data_check[key]['modified'] }}" name="{{key}}">
+                                <button type="button" class="btn btn-outline-warning col-2" data-toggle="popover" title="Differences" data-content="Original : {{ data_check[key]['original'] }} Obtenue : {{ data_check[key]['modified'] }}  differences : {{ data_check[key]['cost'] }}">Warning</button>
+                            {% else %}
+                                <input type="text" class="form-control-plaintext col-9" id="{{ key }}" value="{{ data_check[key]['original'] }}" name="{{key}}">
+                                <button type="button" class="btn btn-outline-danger col-2" data-toggle="popover" title="Differences" data-content="Original : {{ data_check[key]['original'] }} Obtenue : {{ data_check[key]['modified'] }}  differences : {{ data_check[key]['cost'] }}">Danger</button>
+                            {% endif%}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <input type="submit" name="submit" value="Valider" />
+            {% endif %}
         </form>
     </div>
-</div>  
+</div>
 {% endblock %}

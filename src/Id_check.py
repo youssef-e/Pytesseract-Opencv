@@ -26,6 +26,20 @@ from Classes.Fields import Fields
 
 from Utils import query_yes_no
 
+detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
+arg = argparse.ArgumentParser()
+arg.add_argument(
+		"-i","--input",
+		type=str,
+		default=detection_results_folder,
+		help="Output path for detection results. Default is "
+		+ detection_results_folder,
+		)
+FLAGS = arg.parse_args()
+result_folder=FLAGS.input
+detection_results_file = os.path.join(result_folder, "Detection_Results.json")
+id_check_results_file = os.path.join(result_folder, "Id_check_Results.json")
+
 def distance(str1,str2):
 	def cost(x,y):
 		return 0 if x==y else 1
@@ -107,6 +121,7 @@ def data_integrity_check(data):
 
 		for c in data_object:
 			if not data_object[c].synthax_check():
+				print("error found in",c)
 				return False
 	return True
 
@@ -121,7 +136,7 @@ def compare_to_mrz(data):
 	birthday = data_object ['Birthday'].word_to_mrz()
 	mrz1 = data_object ['Mrz1']
 	mrz2 = data_object ['Mrz2']
-	if mrz1.synthax_check() and mrz2.synthax_check() :
+	if mrz1.synthax_check()[0] and mrz2.synthax_check()[0] :
 		#extracting relevant data from mrz
 		mrz_name = mrz1.name_mrz()
 		mrz_fname = mrz2.fname_mrz()
@@ -140,22 +155,27 @@ def compare_to_mrz(data):
 		print("birthday differences: ")
 		(birthday, birthday_diff) = compare_strings(mrz_birthday,birthday,'Birthday')
 		print("gender differences: ")
-		(gender,gender_diff) = compare_strings(mrz_gender,gender,'Gender')
+		(gender,gender_diff) = compare_strings(mrz_gender,gender,'Gender', False)
 		print("location differences: ")
 		(location,location_diff) = compare_strings(mrz_location,id_nbr[4:7],'Field')
-		#comparing the extracted mrz with the reconstructed one(including the control keys)
+		#comparing the extracted mrz with the reconstructed one (including the control keys)
 		mrz = mrz1.field + mrz2.field
 		compared_mrz = "IDFRA"+name+location+mrz_agent_nbr+id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender
+		compared_mrz1 = "IDFRA"+name+location+mrz_agent_nbr
+		compared_mrz2 =  id_nbr+str(get_key(id_nbr))+fname+birthday+str(get_key(birthday)) + gender + str(get_key(compared_mrz))
 		compared_mrz += str(get_key(compared_mrz))
 		print("mrz differences: ")
 		(mrz, mrz_diff)= compare_strings(mrz,compared_mrz,'MRZ',False)
+		(mrz1, mrz1_diff)= compare_strings(mrz1.field,compared_mrz1,'MRZ',False)
+		(mr2, mrz2_diff)= compare_strings(mrz2.field,compared_mrz2,'MRZ',False)
 		new_data = {
 			'Name': name_diff,
 			'First_name': fname_diff,
 			'Id_number': id_nbr_diff,
 			'Birthday': birthday_diff,
 			'Gender': gender_diff,
-			'Mrz': mrz_diff
+			'Mrz1': mrz1_diff,
+			'Mrz2': mrz2_diff
 			}
 	else:
 		new_data = {
@@ -176,7 +196,7 @@ def compare_strings(mrz_str, str1, obj_type, correct=True):
 			arrow=arrow[:i]+'^'+arrow[i+1:]
 			cost+=1
 	initial_cost = cost
-	if cost <= 3 and correct:
+	if cost < 2 and correct:
 		if len(str1)<3 and cost>0:
 			cost=1
 		while cost > 0:
@@ -185,20 +205,19 @@ def compare_strings(mrz_str, str1, obj_type, correct=True):
 			print("       " + arrow)
 			index = arrow.find("^")
 			new_str =  new_str[:index] + mrz[index] + new_str[index+1:]
-			arrow=arrow[:index]+' '+arrow[index+1:]
 			cost -= 1
 	print("mrz:   " + mrz)
 	print("field: " + new_str)
 	print("       " + arrow)
 	if obj_type == 'MRZ':
 		field = {
-		"original" : str1,
+		"original" : mrz_str,
 		"modified" : new_str,
 		"cost" : initial_cost
 	}
 	else:
 		field = {
-		"original" : from_string_to_field(str1,obj_type).mrz_to_word(),
+		"original" : from_string_to_field(mrz_str,obj_type).mrz_to_word(),
 		"modified" : from_string_to_field(new_str,obj_type).mrz_to_word(),
 		"cost" : initial_cost
 	}
@@ -235,20 +254,6 @@ def from_string_to_field(string, type):
 	result=dispatcher[type](string)
 	return result
 
-#--------- Main funtion ------------#
-detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
-arg = argparse.ArgumentParser()
-arg.add_argument(
-		"-i","--input",
-		type=str,
-		default=detection_results_folder,
-		help="Output path for detection results. Default is "
-		+ detection_results_folder,
-		)
-FLAGS = arg.parse_args()
-result_folder=FLAGS.input
-detection_results_file = os.path.join(result_folder, "Detection_Results.json")
-id_check_results_file = os.path.join(result_folder, "Id_check_Results.json")
 def check():
 	with open(detection_results_file) as json_file:
 		data = json.load(json_file)
@@ -259,5 +264,8 @@ def check():
 	new_data = compare_to_mrz(data)
 	with open(id_check_results_file, 'w') as f:
 		json.dump(new_data, f,sort_keys=False,indent=4)
-check()
+
+#--------- Main funtion ------------#
+	if __name__ == "__main__":
+		check()
 
