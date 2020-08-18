@@ -113,5 +113,5 @@ def upload_file():
 
 if __name__ == '__main__':
    hostname = socket.gethostname()
-   ip_address = socket.gethostbyname('localhost')
+   ip_address = '0.0.0.0'
    app.run(host=ip_address, port=5000, debug=True)

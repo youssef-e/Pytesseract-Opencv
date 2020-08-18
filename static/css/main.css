@@ -78,5 +78,10 @@ header {
 }
 
 .popover-content {
-    word-wrap: break-word;
+    white-space: pre-wrap!important;
+    max-width: 390px !important;
+}
+
+.btn {
+  margin-left: 10px;
 }
