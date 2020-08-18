@@ -4,7 +4,7 @@ Pillow==7.2.0
 pytesseract==0.3.5
 PyMuPDF==1.17.2
 werkzeug==0.15.5
-certifi==2018.11.29
+certifi==2020.6.20
 Click==7.0
 Flask==1.0.2
 gunicorn==19.9.0
