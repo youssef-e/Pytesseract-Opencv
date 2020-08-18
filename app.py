@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from werkzeug import secure_filename, ImmutableMultiDict
+from werkzeug.utils import secure_filename, ImmutableMultiDict
 import os
 import sys
 import cv2
