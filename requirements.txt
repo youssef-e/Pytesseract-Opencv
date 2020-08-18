@@ -3,7 +3,7 @@ numpy==1.19.1
 Pillow==7.2.0
 pytesseract==0.3.5
 PyMuPDF==1.17.2
-werkzeug==0.15.5
+werkzeug==1.0.1
 certifi==2018.11.29
 Click==7.0
 Flask==1.0.2
