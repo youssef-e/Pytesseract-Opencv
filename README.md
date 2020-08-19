@@ -23,11 +23,4 @@ You can clone this repository or download a zip file, build and run the Docker i
 $ docker build -t pytesseract-opencv .
 $ docker run -d -p 5000:5000 pytesseract-opencv
 ```
-
-OR you can pull and/or run the Docker image from my repository on Docker Hub
-
-```
-docker pull yellaabi/pytesseract-opencv
-docker run -d -p 5000:5000 yellaabi/pytesseract-opencv
-```
 Then open up browser to http://localhost:5000
