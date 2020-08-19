@@ -2,9 +2,6 @@
 
 An OCR that extract data from ID card using Opencv and Tesseract 
 
-# OCR Tesseract Docker
-Allows upload of an image for OCR using Tesseract and deployed using Docker.  This uses Flask, a light weight web server framework - but for development purposes only.  OpenCV is used to reduce noise in the image for better processing by pytesseract.
-
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
