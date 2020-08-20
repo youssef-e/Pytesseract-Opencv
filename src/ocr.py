@@ -64,39 +64,39 @@ scores2={
           3 : 0.2,
           2 : 0.2,
     }
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument(
-    "-i", "--image",
-    type=str,
-    default=sample_image,
-    help="path to input image to be OCR'd"
-)
+# # construct the argument parse and parse the arguments
+# ap = argparse.ArgumentParser()
+# ap.add_argument(
+#     "-i", "--image",
+#     type=str,
+#     default=sample_image,
+#     help="path to input image to be OCR'd"
+# )
 
-ap.add_argument(
-        "-njs", "--no_js",
-        default=False,
-        action="store_true",
-        help="save the output in a JSON file. Default is False.",
-    )
+# ap.add_argument(
+#         "-njs", "--no_js",
+#         default=False,
+#         action="store_true",
+#         help="save the output in a JSON file. Default is False.",
+#     )
 
-ap.add_argument(
-        "-o","--output",
-        type=str,
-        default=detection_results_folder,
-        help="Output path for detection results. Default is "
-        + detection_results_folder,
-    )
-FLAGS = ap.parse_args()
+# ap.add_argument(
+#         "-o","--output",
+#         type=str,
+#         default=detection_results_folder,
+#         help="Output path for detection results. Default is "
+#         + detection_results_folder,
+#     )
+# FLAGS = ap.parse_args()
 
 #declaration of variables
-save_result= not FLAGS.no_js
-result_folder=FLAGS.output
-input_file = FLAGS.image
+save_result= not False
+result_folder=detection_results_folder
+input_file = sample_image,
 delete = False
 
 #detect if the input file is a pdf, and if it is, covert it to png
-def run( input_f = input_file): 
+def run(task_id, input_f = input_file): 
   print("input_file::",input_f)
   if(input_f.split(".")[len(input_f.split("."))-1]=="pdf"):
     pdf_convertion(input_f, detection_results_folder+"/pdfToimage.png")
@@ -107,7 +107,8 @@ def run( input_f = input_file):
   (img,gray) = pre_process(img, input_f)
   result = get_Strings(img, gray, scores1,scores2)
   if save_result:
-    detection_results_file = os.path.join(result_folder, "Detection_Results.json")
+    json_name="Detection_Results{}.json".format(task_id)
+    detection_results_file = os.path.join(result_folder, json_name)
     with open(detection_results_file, 'w') as f:
       json.dump(result, f,sort_keys=False,indent=4)
     return gray

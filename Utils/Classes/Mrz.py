@@ -34,7 +34,7 @@ class Mrz(Fields):
 				if ((c=="(" or c == "[" or c == "{")):
 					key = "<"
 					break
-				elif ((c == "S" or c == "C" or c=="k" or c=="K" or c =="E") and ( i-1 >= 0 and len(final_word) !=0) and (final_word[i-1] == "<") and chars[c]<5):
+				elif ((c == "S" or c == "C" or c=="k" or c=="K" or c =="E") and ( i-1 >= 0 and len(final_word) !=0) and (len(final_word)>=i) and (final_word[i-1] == "<") and chars[c]<5):
 					if '<' in chars :
 						key = "<"
 						break
