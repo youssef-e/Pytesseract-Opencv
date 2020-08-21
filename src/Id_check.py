@@ -27,16 +27,16 @@ from Classes.Fields import Fields
 from Utils import query_yes_no
 
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
-arg = argparse.ArgumentParser()
-arg.add_argument(
-		"-i","--input",
-		type=str,
-		default=detection_results_folder,
-		help="Output path for detection results. Default is "
-		+ detection_results_folder,
-		)
-FLAGS = arg.parse_args()
-result_folder=FLAGS.input
+# arg = argparse.ArgumentParser()
+# arg.add_argument(
+# 		"-i","--input",
+# 		type=str,
+# 		default=detection_results_folder,
+# 		help="Output path for detection results. Default is "
+# 		+ detection_results_folder,
+# 		)
+# FLAGS = arg.parse_args()
+result_folder=detection_results_folder
 detection_results_file = os.path.join(result_folder, "Detection_Results.json")
 id_check_results_file = os.path.join(result_folder, "Id_check_Results.json")
 
@@ -254,7 +254,9 @@ def from_string_to_field(string, type):
 	result=dispatcher[type](string)
 	return result
 
-def check():
+def check(task_id):
+	detection_results_file = os.path.join(result_folder, "Detection_Results{}.json".format(task_id))
+	id_check_results_file = os.path.join(result_folder, "Id_check_Results{}.json".format(task_id))
 	with open(detection_results_file) as json_file:
 		data = json.load(json_file)
 

@@ -12,25 +12,18 @@
             <p class="text-left">Upload another?</p>
             <form action="/loading" method="POST" enctype="multipart/form-data">
                 <input type="file" name="file" />
-                 <script type="text/javascript">
-                    function loading(){
-                        $("#loading").show();
-                        $("#content").hide();
-                        }       
-                </script>
-                <input type="submit" name="anything_submit" value="Submit" onclick="loading();">
+                <input type="submit" name="anything_submit" value="Submit">
             </form>
         </div>        
     </div>
    
-    <div id="loading"></div>
     <div id="content" class="col-md-6">
         <script type="text/javascript">
             function toggle_popover() {
             $('[data-toggle="popover"]').popover()}
         </script>
         <p class="text-left" id="col-md-7_ocr-text">OCR Text from processed Image</p>
-        <form method="POST" action="/correct-data" name="correct_data">
+        <form method="POST" action="/correct-data/{{ task_id }}" name="correct_data">
             {% if 'error' in data_check %}
                 {% for key in data %}
                     <div class="form-row">
