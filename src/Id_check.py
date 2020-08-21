@@ -133,7 +133,10 @@ def compare_to_mrz(data):
 	fname = data_object['First_name'].word_to_mrz()
 	id_nbr = data_object['Id_number'].word_to_mrz()
 	gender = data_object['Gender'].word_to_mrz()
-	birthday = data_object ['Birthday'].word_to_mrz()
+	if data_object ['Birthday'].synthax_check():
+		birthday = data_object ['Birthday'].word_to_mrz()
+	else:
+		birthday = data_object ['Birthday']
 	mrz1 = data_object ['Mrz1']
 	mrz2 = data_object ['Mrz2']
 	if mrz1.synthax_check()[0] and mrz2.synthax_check()[0] :
