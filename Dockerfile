@@ -1,15 +1,17 @@
-FROM python:3.7.9-buster
+FROM ubuntu:20.04 
 
-RUN apt update && apt install -y libsm6 libxext6
-
-RUN apt-get -y install tesseract-ocr-fra
+RUN apt-get update 
+RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
+RUN apt-get install -y tesseract-ocr-fra python3-pip
 
 COPY . /app
 
 WORKDIR /app
 
-RUN pip install -r requirements.txt
+RUN pip3 install scikit-build
 
-ENTRYPOINT ["python"]
+RUN pip3 install -r requirements.txt
+
+ENTRYPOINT ["python3"]
 
 CMD ["app.py"]
