@@ -1,4 +1,4 @@
-FROM python:3
+FROM python:3.7.9-buster
 
 RUN apt update && apt install -y libsm6 libxext6
 
