@@ -10,10 +10,21 @@
         </div>
         <div class="upload-form">
             <p class="text-left">Upload another?</p>
-            <form action="/loading" method="POST" enctype="multipart/form-data">
-                <input type="file" name="file" />
-                <input type="submit" name="anything_submit" value="Submit">
-            </form>
+            <form action = "" method = "POST"  id="input_data"
+                enctype = "multipart/form-data">
+                <input type = "file" name = "file" />
+                <input type="submit" name="submit_html" value="Submit" onclick="to_html()">
+                <input type="submit" name="submit_json" value="test" onclick="to_json()">
+              </form>
+              <script>
+              form=document.getElementById("input_data");
+              function to_html() {
+                form.action="/loading";
+              }
+              function to_json() {
+                form.action="/analyse";
+              }
+              </script>
         </div>        
     </div>
    

@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request, redirect, url_for,g, abort,current_app
+from flask import Flask,render_template,request, redirect, url_for,g, abort,current_app, Response
 from werkzeug.exceptions import HTTPException, InternalServerError
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import ImmutableMultiDict
@@ -86,6 +86,39 @@ def correct_data(task_id):
    check(task_id)
    return redirect(url_for('upload_file',task_id=task_id))
 
+@app.route('/analyse', methods = ['POST','GET'])
+def analyse():
+   global task_id
+   if request.method == 'POST':
+      f = request.files['file']
+      # create a secure filename
+      filename = secure_filename(f.filename)
+      # save file to /static/uploads
+      filepath = os.path.join(app.config['UPLOAD_FOLDER'],filename)
+      try:
+         f.save(filepath)
+      except IsADirectoryError:
+         return render_template("index.html")
+      task_id = random.randrange(1000,9999)
+      img=cv2.imread(filepath)
+      imagename = "{}.png".format(task_id)
+      ofilename = os.path.join(app.config['UPLOAD_FOLDER'],imagename)
+      cv2.imwrite(ofilename, img)
+
+      detection_results_file = os.path.join(detection_results_folder, "Detection_Results{}.json".format(task_id))
+      tasks[task_id] = {'task_thread': Thread(target=threaded_task, args=(task_id,filepath)),
+                        'filepath': filepath}
+      tasks[task_id]['task_thread'].daemon = True
+      tasks[task_id]['task_thread'].start()
+      token = {
+        'Token': task_id,
+      }
+
+      json_token=json.dumps(token,sort_keys=False,indent=4)
+      return json_token
+   if request.method == 'GET':
+      return Response("404 not found", status=404)
+
 @app.route('/loading', methods = ['POST','GET'])
 def load():
    global task_id
@@ -114,6 +147,35 @@ def load():
    if request.method == 'GET':
       return render_template("loading.html",task_id=task_id)
 
+@app.route('/status/<int:task_id>', methods = ['GET'])
+def status(task_id):
+  if(task_id not in tasks):
+    return Response("404 not Found", status=404)
+  else:
+    detection_results_file = os.path.join(detection_results_folder, "Detection_Results{}.json".format(task_id))
+    id_check_results_file = os.path.join(detection_results_folder, "Id_check_Results{}.json".format(task_id))
+    if os.path.exists(detection_results_file):
+      if not os.path.exists(id_check_results_file):
+        check(task_id)
+      with open(detection_results_file) as json_file:
+        data = json.load(json_file)
+      data = json.dumps(data,sort_keys=False,indent=4)
+      os.remove(detection_results_file)
+      with open(id_check_results_file) as json_file:
+        data_check = json.load(json_file)
+      data_check= json.dumps(data_check,sort_keys=False,indent=4)
+      os.remove(id_check_results_file)
+      imagename = "{}.png".format(task_id)
+      ofilename = os.path.join(app.config['UPLOAD_FOLDER'],imagename)
+      os.remove(ofilename)
+      del tasks[task_id]
+      if 'error' in data_check:
+        return Response(data, status=200, mimetype='application/json')
+      else:
+        return Response(data_check, status=200, mimetype='application/json')
+    else:
+        # time.sleep(10)
+        return Response("processing", status=102)
 @app.route('/loaded/<int:task_id>', methods = ['GET'])
 def is_loaded(task_id):
    print(task_id)
@@ -137,8 +199,10 @@ def upload_file(task_id):
    check(task_id)
    with open(detection_results_file) as json_file:
       data = json.load(json_file)
+      os.remove(detection_results_file)
    with open(id_check_results_file) as json_file:
       data_check = json.load(json_file)
+      os.remove(id_check_results_file)
    return render_template("uploaded.html", data=data, data_check=data_check, fname=imagename,task_id=task_id)
 
 if __name__ == '__main__':
