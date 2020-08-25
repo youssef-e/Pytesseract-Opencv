@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 RUN apt-get update 
 RUN DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata
 RUN apt-get install -y tesseract-ocr-fra python3-pip
-
+RUN apt-get install -y libgl1-mesa-glx
 COPY . /app
 
 WORKDIR /app
