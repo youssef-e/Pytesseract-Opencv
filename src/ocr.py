@@ -109,7 +109,7 @@ input_file = sample_image,
 delete = False
 
 #detect if the input file is a pdf, and if it is, covert it to png
-def run(task_id, input_f = input_file): 
+def run( input_f, task_id ): 
   print("input_file::",input_f)
   if(input_f.split(".")[len(input_f.split("."))-1]=="pdf"):
     pdf_convertion(input_f, detection_results_folder+"/pdfToimage.png")
