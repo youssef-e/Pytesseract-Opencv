@@ -57,7 +57,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def threaded_task(filepath,task_id):
-   gray = run(filepath,task_id)
+   gray = run(task_id, filepath)
 
 @app.route("/")
 def index():
