@@ -3,7 +3,23 @@ import argparse
 import os
 import sys
 import json
+import fitz
 
+
+
+
+def pdf_convertion(input_file, output):
+  """
+  convert a pdf input file into a pn.
+
+  "input_file" is the path to the pdf file to convert.
+  "output" is the name of the output file and should contain the .png extention.
+  """
+  doc = fitz.open(input_file)
+  page = doc.loadPage(0) #number of page
+  pix = page.getPixmap()
+  input_file = output
+  pix.writePNG(input_file)
 
 def get_parent_dir(n=1):
     """ returns the n-th parent dicrectory of the current working directory."""
@@ -16,9 +32,6 @@ def get_parent_dir(n=1):
 utils_path = os.path.join(get_parent_dir(1), "Utils")
 sys.path.append(utils_path)
 
-from Utils import (
-    pdf_convertion,
-  )
 from Extract_Utils import get_Strings
 
 from Image_Process_Utils import(

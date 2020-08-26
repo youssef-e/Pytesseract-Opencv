@@ -24,9 +24,8 @@ from Classes.Mrz1 import Mrz1
 from Classes.Mrz2 import Mrz2
 from Classes.Fields import Fields
 
-from Utils import query_yes_no
 
-detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
+result_folder = os.path.join(get_parent_dir(n=1), "results")
 # arg = argparse.ArgumentParser()
 # arg.add_argument(
 # 		"-i","--input",
@@ -36,9 +35,6 @@ detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
 # 		+ detection_results_folder,
 # 		)
 # FLAGS = arg.parse_args()
-result_folder=detection_results_folder
-detection_results_file = os.path.join(result_folder, "Detection_Results.json")
-id_check_results_file = os.path.join(result_folder, "Id_check_Results.json")
 
 def distance(str1,str2):
 	def cost(x,y):

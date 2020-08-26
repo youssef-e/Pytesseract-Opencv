@@ -29,7 +29,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024
 ALLOWED_EXTENSIONS = { 'pdf', 'png', 'jpg', 'jpeg'}
 detection_results_folder = os.path.join(get_parent_dir(n=1), "results")
-json_file = os.path.join(detection_results_folder ,"Detection_Result.json")
 
 task_id=0;
 
