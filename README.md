@@ -48,3 +48,20 @@ Now open the app in your browser:
 ```
 $ heroku open
 ```
+### Closing Docker container
+
+ for closing a Docker container, after running it :
+```
+ $ docker stop my_container
+```
+With my_container being either the container id or name. You can look at your running container’s property with the command:
+```
+ $ docker ps
+```
+or if you want to look at all your created containers:
+```
+ $ docker ps -a
+```
+ lastly if you want to delete a container:
+```
+ $ docker rm my_container
