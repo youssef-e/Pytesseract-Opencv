@@ -61,23 +61,12 @@ The web server is made using Flask, an open-source web development framework in 
 
 - route: __*/analyse*__
   * input: deposited image
-  * output: 
-```jSON
-{"Token" : "Task_id"}
-```
-  *create a thread that run the `run()` method from __*src/ocr.py*__, and then add it to **tasks**, a global dictionnaries of thread, along with its *Task_id*. It will then create a json with the thread id
+  * output: `{"Token" : "Task_id"}`
+  create a thread that run the `run()` method from __*src/ocr.py*__, and then add it to **tasks**, a global dictionnaries of thread, along with its *Task_id*. It will then create a json with the thread id
 
 - route: __*/status/<Task_id>*__
-  check if Task_id exist in the **tasks** dictionnary
-    * if doesn't exist:respond with an  `not found : 404` html code
-  check if __*results/Detection_Results{thread_id}.json*__ exist.
-  * if it doesn't exist:
-  respond with `processing : 102` html code
-  * if it does exist:
-  it will run the `check()` method from __*src/Id_check*__
-  and then will check if __*results/Id_check_Results{thread_id}.json*__ contain the field `'error'`
-    * if it doesn't have it:
-    it will show __*results/Id_check_Results{thread_id}.json*__ and respond with `Ok : 200`
-    * if it does have it:
-    it will show __*results/Detection_Results{thread_id}.json*__ and respond with `Ok : 200`
-either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
+
+  - check if Task_id exist in the **tasks** dictionnary and respond with an  `not found : 404` html code if it doesn't
+  - check if __*results/Detection_Results{thread_id}.json*__  exist in __*results*__ and respond with `processing : 102` html code if it doesn't
+  - run the `check()` method from __*src/Id_check*__ and then will check if __*results/Id_check_Results{thread_id}.json*__ contain the field `'error'`; it will show __*results/Id_check_Results{thread_id}.json*__ and respond with `Ok : 200` if no error is found or __*results/Detection_Results{thread_id}.json*__ otherwise.
+  -either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
