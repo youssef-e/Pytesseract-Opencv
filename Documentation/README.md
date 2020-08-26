@@ -30,7 +30,7 @@ The code can be divided in two part: the Ocr process and the web server process.
 
 the Ocr process is started by a call to the run() method situated in __*src/ocr.py*__
 
-```
+```python
 from ocr import run
 
 run(image_path, thread_id)
@@ -46,7 +46,7 @@ as each field has its own extraction method, and in order to make the code more 
 
 __*src/Id_check*__ is then called after the ocr process is finished to check weither or not the content of __*results/Detection_Results{thread_id}.json*__ is syntaxically correct and then if the MRZ is valid, will compare the fields with it.
 the method called is check(), and only take as argument the thread_id, and will write its results in __*results/Id_check_Results{thread_id}.json*__
-```
+```python
 from Id_check import check
 
 check(thread_id)
