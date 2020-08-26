@@ -18,9 +18,6 @@ This project being written with python, it uses several librairies to make it wo
   - jquerry
   - poppers
 
-### File system
-
-![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/blob/master/Documentation/images/fileSysteme.png)
 
 ### How it works
 
@@ -36,21 +33,27 @@ from ocr import run
 run(image_path, thread_id)
 ```
 it will take as argument *image_path* which is the path to the image to be processed and *thread_id* the id of the thread which will be running the task. the output is an opencv image (or numpy.array) of the grayscale image, and after the ocr is ended, it will write its result in __*results/Detection_Results{thread_id}.json*__
-the ocr process start with image pre-processing : it trims the border, rescales the image and deskew it. after that, the image will be duplicated throught 20 threshold filters, and tesseract will extract text from each one of the duplicated image, resulting in an array of 20 dictionaries that contains the fields of the id card for each image. each field is then averaged thanks to a system of coefficients whose values (per filter) are found in ocr.py
-finally the result is written on a JSON file( __*results/Detection_Results{thread_id}.json*__ )
+the ocr preocess can be described by the steps below:
 
 ![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/blob/master/Documentation/images/schema1.png)
 
-The methods used for image processing are found in __*Utils/Image_Process_Utils.py*__ and the methods used for extracting the fields from the images and then averaging them are found in __*Utils/Extract_Utils.py*__
-as each field has its own extraction method, and in order to make the code more readable, they are represented as objects in the Utils/Classes directory, with each field inheriting from the Fields class.
+1. The ocr process start with image pre-processing : it trims the border, rescales the image and deskew it. after that, the image will be duplicated throught 20 threshold filters.
+	In this step, Two files are called: __*src/ocr.py*__ which start the process, and __*Utils/Image_Process_Utils.py*__ which contain all the methods for image processing, and __*Utils/Extract_Utils.py*__ for calling the method that applies the filters
 
-__*src/Id_check*__ is then called after the ocr process is finished to check weither or not the content of __*results/Detection_Results{thread_id}.json*__ is syntaxically correct and then if the MRZ is valid, will compare the fields with it.
+2. Tesseract will extract text from each one of the duplicated image, resulting in an array of 20 dictionaries that contains the fields of the id card for each image. 
+	In this step, the files called are: __*Utils/Extract_Utils.py*__ that will call Tesseract, on each image, and call the extraction methods located in __*Utils/Classes/`*`*__.
+	as each field has its own extraction method, and in order to make the code more readable, they are represented as objects in the Utils/Classes directory, with each field inheriting from the Fields class.
+
+3. Each field is then averaged thanks to a system of coefficients whose values (per filter) are found in __*src/ocr.py*__. The averaging is also made in __*Utils/Extract_Utils.py*__, using the methods in __*Utils/Classes/`*`*__ objects and the result is retrieved by __*src/ocr.py*__ and  written in a JSON file( __*results/Detection_Results{thread_id}.json*__ )
+
+
+4. __*src/Id_check*__ is then called after the ocr process is finished to check weither or not the content of __*results/Detection_Results{thread_id}.json*__ is syntaxically correct and then if the MRZ is valid, will compare the fields with it.
 the method called is check(), and only take as argument the thread_id, and will write its results in __*results/Id_check_Results{thread_id}.json*__
 ```python
 from Id_check import check
 
 check(thread_id)
 ```
-it will the look for __*results/Detection_Results{thread_id}.json*__, read its data, and then check if the fields are syntaxically correct. if so, it will reconstitute The MRZ using the field and then compare it to the actual MRZ. it will also compare each field with its equivalent in the MRZ to try to correct minor error. Lastly it will write the results of each comparison in __*results/Id_check_Results{thread_id}.json*__
-
+it will then look for __*results/Detection_Results{thread_id}.json*__, read its data, and then check if the fields are syntaxically correct. if so, it will reconstitute The MRZ using the field and then compare it to the actual MRZ. it will also compare each field with its equivalent in the MRZ to try to correct minor error. Lastly it will write the results of each comparison in __*results/Id_check_Results{thread_id}.json*__ which can the be used along with __*results/Detection_Results{thread_id}.json*__ for the website in by __*app.py*__.
+	
 #### Web server process
