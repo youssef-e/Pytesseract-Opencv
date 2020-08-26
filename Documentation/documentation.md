@@ -20,7 +20,7 @@ This project being written with python, it uses several librairies to make it wo
 
 ### File system
 
-![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/blob/master/Documentation/images/fileSystem.png)
+![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/blob/master/Documentation/images/fileSysteme.png)
 
 ### How it works
 
