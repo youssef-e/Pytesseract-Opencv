@@ -60,18 +60,16 @@ It will look for __*results/Detection_Results{thread_id}.json*__, read its data,
 The web server is made using Flask, an open-source web development framework in Python that is meant to be light, combined with a system of templates. the Templates are located in __*templates/*__ and are using Jinja2 to work. The routes are located in __*app.py*__:
 
 - route: __*/analyse*__
-input: deposited image
-output: 
+  * input: deposited image
+  * output: 
 ```jSON
 {"Token" : "Task_id"}
 ```
-create a thread that run the `run()` method from __*src/ocr.py*__, and then add it to **tasks**, a global dictionnaries of thread, along with its *Task_id*.
-It will then create a json with the thread id
+  *create a thread that run the `run()` method from __*src/ocr.py*__, and then add it to **tasks**, a global dictionnaries of thread, along with its *Task_id*. It will then create a json with the thread id
 
 - route: __*/status/<Task_id>*__
-  * check if Task_id exist in the **tasks** dictionnary
-    * if doesn't exist:
-    respond with an  `not found : 404` html code
+  check if Task_id exist in the **tasks** dictionnary
+    * if doesn't exist:respond with an  `not found : 404` html code
   check if __*results/Detection_Results{thread_id}.json*__ exist.
   * if it doesn't exist:
   respond with `processing : 102` html code
@@ -82,4 +80,4 @@ It will then create a json with the thread id
     it will show __*results/Id_check_Results{thread_id}.json*__ and respond with `Ok : 200`
     * if it does have it:
     it will show __*results/Detection_Results{thread_id}.json*__ and respond with `Ok : 200`
-  either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
+either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
