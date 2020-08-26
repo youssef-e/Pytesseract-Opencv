@@ -20,7 +20,7 @@ This project being written with python, it uses several librairies to make it wo
 
 ### File system
 
-![Image of file system](https://github.com/everycheck/Pytesseract-Opencv/edit/master/Documentation/images/fileSystem.png)
+![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/edit/master/Documentation/images/fileSystem.png)
 
 ### How it works
 
@@ -39,7 +39,7 @@ it will take as argument *image_path* which is the path to the image to be proce
 the ocr process start with image pre-processing : it trims the border, rescales the image and deskew it. after that, the image will be duplicated throught 20 threshold filters, and tesseract will extract text from each one of the duplicated image, resulting in an array of 20 dictionaries that contains the fields of the id card for each image. each field is then averaged thanks to a system of coefficients whose values (per filter) are found in ocr.py
 finally the result is written on a JSON file( __*results/Detection_Results{thread_id}.json*__ )
 
-![Image of file system](https://github.com/everycheck/Pytesseract-Opencv/edit/master/Documentation/images/schema1.png)
+![Image of file system](https://github.com/youssef-e/Pytesseract-Opencv/edit/master/Documentation/images/schema1.png)
 
 The methods used for image processing are found in __*Utils/Image_Process_Utils.py*__ and the methods used for extracting the fields from the images and then averaging them are found in __*Utils/Extract_Utils.py*__
 as each field has its own extraction method, and in order to make the code more readable, they are represented as objects in the Utils/Classes directory, with each field inheriting from the Fields class.
