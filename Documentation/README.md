@@ -69,4 +69,4 @@ The web server is made using Flask, an open-source web development framework in 
   - check if Task_id exist in the **tasks** dictionnary and respond with an  `not found : 404` html code if it doesn't
   - check if __*results/Detection_Results{thread_id}.json*__  exist in __*results*__ and respond with `processing : 102` html code if it doesn't
   - run the `check()` method from __*src/Id_check*__ and then will check if __*results/Id_check_Results{thread_id}.json*__ contain the field `'error'`; it will show __*results/Id_check_Results{thread_id}.json*__ and respond with `Ok : 200` if no error is found or __*results/Detection_Results{thread_id}.json*__ otherwise.
-  -either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
+  - either way it will then delete the two json files and then remove the thread from the **tasks** dictionnary
