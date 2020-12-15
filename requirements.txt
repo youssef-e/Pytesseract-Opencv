@@ -1,7 +1,7 @@
 opencv-python==4.3.0.38
 numpy==1.19.1
 Pillow==7.2.0
-pytesseract==0.3.5
+pytesseract==0.3.7
 PyMuPDF==1.17.5
 werkzeug==1.0.1
 Click==7.1.2
